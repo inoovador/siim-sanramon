@@ -1,0 +1,101 @@
+name: SIIM CI
+
+on:
+  push:
+    branches: [main, 'feat/**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php: ['8.2', '8.3']
+
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: secret
+          MARIADB_DATABASE: siim_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    defaults:
+      run:
+        working-directory: siim
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, intl, pdo_mysql, redis, zip, bcmath, gd
+          coverage: xdebug
+          tools: composer:v2
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: siim/vendor
+          key: ${{ runner.os }}-php${{ matrix.php }}-${{ hashFiles('siim/composer.lock') }}
+
+      - name: Install deps
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Copy env
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Run migrations (necesario para tests Breeze con RefreshDatabase)
+        env:
+          DB_CONNECTION: mariadb
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: siim_test
+          DB_USERNAME: root
+          DB_PASSWORD: secret
+        run: php artisan migrate --force
+
+      - name: Lint (Pint)
+        run: composer lint:test
+
+      - name: Static analysis (PHPStan)
+        run: composer analyse
+
+      - name: Architecture (Deptrac)
+        run: composer deptrac
+
+      - name: Tests (Pest)
+        env:
+          DB_CONNECTION: mariadb
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: siim_test
+          DB_USERNAME: root
+          DB_PASSWORD: secret
+          REDIS_HOST: 127.0.0.1
+        run: composer test
