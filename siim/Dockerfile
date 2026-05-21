@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.6
 # SIIM — Sistema Inteligente de Imagen Municipal
-# FrankenPHP single-binary HTTP+PHP server
+# serversideup/php pre-built (nginx + php-fpm + extensions ya compiladas)
 
 ############################
 # Stage 1: build assets
@@ -24,33 +24,29 @@ COPY . .
 RUN composer dump-autoload --optimize --classmap-authoritative --no-dev
 
 ############################
-# Stage 3: runtime FrankenPHP
+# Stage 3: runtime serversideup/php (nginx + php-fpm + extensions)
 ############################
-FROM dunglas/frankenphp:1-php8.3 AS runtime
+FROM serversideup/php:8.3-fpm-nginx AS runtime
 
-RUN install-php-extensions \
-    pdo_mysql \
-    intl \
-    zip \
-    bcmath \
-    gd \
-    opcache \
-    pcntl \
-    redis
+ENV SSL_MODE=off
+ENV PHP_OPCACHE_ENABLE=1
+ENV PHP_DATE_TIMEZONE=America/Lima
+ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
+ENV AUTORUN_ENABLED=true
+ENV AUTORUN_LARAVEL_STORAGE_LINK=true
+ENV AUTORUN_LARAVEL_MIGRATION=true
+ENV AUTORUN_LARAVEL_MIGRATION_ISOLATION=true
+ENV AUTORUN_LARAVEL_DB_SEED=true
+ENV AUTORUN_LARAVEL_DB_SEED_CLASS=Database\\Seeders\\DatabaseSeeder
+ENV AUTORUN_LARAVEL_CONFIG_CACHE=true
+ENV AUTORUN_LARAVEL_ROUTE_CACHE=true
+ENV AUTORUN_LARAVEL_VIEW_CACHE=true
 
-WORKDIR /app
+WORKDIR /var/www/html
 
-COPY --from=vendor /app /app
-COPY --from=assets /app/public/build /app/public/build
-
-RUN printf '{\n  auto_https off\n  admin off\n  persist_config off\n  frankenphp\n}\n\n:8080 {\n  root * /app/public\n  encode gzip\n  php_server\n}\n' > /etc/caddy/Caddyfile
-
-RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache && \
-    chmod -R 775 /app/storage /app/bootstrap/cache
+COPY --chown=www-data:www-data --from=vendor /app /var/www/html
+COPY --chown=www-data:www-data --from=assets /app/public/build /var/www/html/public/build
 
 EXPOSE 8080
 
-RUN printf '#!/bin/sh\nset -e\ncd /app\nphp artisan config:cache || true\nphp artisan route:cache || true\nphp artisan view:cache || true\nphp artisan migrate --force || true\nphp artisan db:seed --force --class=Database\\\\Seeders\\\\DatabaseSeeder || true\nexec frankenphp run --config /etc/caddy/Caddyfile\n' > /usr/local/bin/start.sh && \
-    chmod +x /usr/local/bin/start.sh
-
-CMD ["/usr/local/bin/start.sh"]
+USER www-data
