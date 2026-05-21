@@ -104,6 +104,8 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.1/dist/apexcharts.min.js" defer></script>
     @livewireScripts
+    @stack('scripts')
 </body>
 </html>
