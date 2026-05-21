@@ -1,3 +1,30 @@
+@import 'https://fonts.bunny.net/css?family=inter:400,500,600,700|source-serif-pro:400,600,700&display=swap';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    :root {
+        --brand-canopy: #0F4D2A;
+        --brand-river:  #1E7FA8;
+        --brand-gold:   #E0A24A;
+        --brand-clay:   #9B4A2C;
+        --brand-mist:   #F4F1EA;
+        --ink-deep:     #1A1F1B;
+        --ink-soft:     #5D6A60;
+    }
+
+    html { @apply antialiased; }
+    body { @apply bg-brand-mist text-ink-deep font-sans; }
+    h1, h2, h3 { @apply font-serif text-ink-deep; }
+}
+
+@layer components {
+    .btn-primary {
+        @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-canopy text-white font-medium shadow-brand hover:bg-brand-canopy/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-gold transition;
+    }
+    .card {
+        @apply rounded-xl bg-white shadow-brand p-6;
+    }
+}
