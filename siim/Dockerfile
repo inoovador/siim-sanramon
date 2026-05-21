@@ -1,23 +1,18 @@
 # syntax=docker/dockerfile:1.6
-FROM php:8.3-cli-alpine
-
-RUN apk add --no-cache git unzip libzip-dev icu-dev libpng-dev oniguruma-dev mariadb-dev \
- && docker-php-ext-install -j$(nproc) pdo_mysql intl zip mbstring bcmath gd opcache pcntl \
- && apk del icu-dev libpng-dev oniguruma-dev libzip-dev || true
-
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
+FROM composer:2 AS vendor
 WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-interaction --no-progress --optimize-autoloader --no-scripts
 COPY . .
-RUN composer install --no-dev --no-interaction --no-progress --optimize-autoloader
+RUN composer dump-autoload --optimize --classmap-authoritative --no-dev
 
-RUN apk add --no-cache nodejs npm \
- && npm ci --no-audit --no-fund && npm run build && rm -rf node_modules \
- && apk del nodejs npm || true
-
+FROM php:8.3-cli-alpine
+RUN apk add --no-cache libzip icu libpng oniguruma mariadb-client \
+ && apk add --no-cache --virtual .build-deps libzip-dev icu-dev libpng-dev oniguruma-dev mariadb-dev \
+ && docker-php-ext-install -j$(nproc) pdo_mysql intl zip mbstring bcmath gd opcache pcntl \
+ && apk del .build-deps
+WORKDIR /app
+COPY --from=vendor /app /app
 RUN chown -R nobody:nobody storage bootstrap/cache && chmod -R 775 storage bootstrap/cache
-
 EXPOSE 80
-
-CMD ["sh","-c","php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan migrate --force && php artisan db:seed --force --class=Database\\\\Seeders\\\\DatabaseSeeder && php -S 0.0.0.0:80 -t public"]
-# rebuild 1779399163
+CMD ["sh","-c","php artisan config:cache; php artisan route:cache; php artisan view:cache; php artisan migrate --force; php artisan db:seed --force --class=Database\\\\Seeders\\\\DatabaseSeeder; exec php -S 0.0.0.0:80 -t public"]
