@@ -196,6 +196,21 @@ parameters:
 			path: tests/Feature/ProfileTest.php
 
 		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:seed\\(\\)\\.$#"
+			count: 1
+			path: tests/Feature/Panel/PanelPagesTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:actingAs\\(\\)\\.$#"
+			count: 3
+			path: tests/Feature/Panel/PanelPagesTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:get\\(\\)\\.$#"
+			count: 5
+			path: tests/Feature/Panel/PanelPagesTest.php
+
+		-
 			message: "#^Function something\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: tests/Pest.php

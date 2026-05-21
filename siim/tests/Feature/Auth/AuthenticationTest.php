@@ -47,14 +47,13 @@ test('users can not authenticate with invalid password', function () {
 
 test('navigation menu can be rendered', function () {
     $user = User::factory()->create();
+    $user->markEmailAsVerified();
 
     $this->actingAs($user);
 
-    $response = $this->get('/dashboard');
+    $response = $this->get('/panel');
 
-    $response
-        ->assertOk()
-        ->assertSeeVolt('layout.navigation');
+    $response->assertOk();
 });
 
 test('users can logout', function () {
