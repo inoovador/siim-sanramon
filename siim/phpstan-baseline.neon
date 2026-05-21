@@ -1,0 +1,101 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Cannot call method hasVerifiedEmail\\(\\) on App\\\\Models\\\\User\\|null\\.$#"
+			count: 1
+			path: app/Http/Controllers/Auth/VerifyEmailController.php
+
+		-
+			message: "#^Cannot call method markEmailAsVerified\\(\\) on App\\\\Models\\\\User\\|null\\.$#"
+			count: 1
+			path: app/Http/Controllers/Auth/VerifyEmailController.php
+
+		-
+			message: "#^Parameter \\#1 \\$user of class Illuminate\\\\Auth\\\\Events\\\\Verified constructor expects Illuminate\\\\Contracts\\\\Auth\\\\MustVerifyEmail, App\\\\Models\\\\User\\|null given\\.$#"
+			count: 1
+			path: app/Http/Controllers/Auth/VerifyEmailController.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:actingAs\\(\\)\\.$#"
+			count: 2
+			path: tests/Feature/Auth/AuthenticationTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:assertAuthenticated\\(\\)\\.$#"
+			count: 1
+			path: tests/Feature/Auth/AuthenticationTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:assertGuest\\(\\)\\.$#"
+			count: 2
+			path: tests/Feature/Auth/AuthenticationTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:get\\(\\)\\.$#"
+			count: 2
+			path: tests/Feature/Auth/AuthenticationTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:actingAs\\(\\)\\.$#"
+			count: 3
+			path: tests/Feature/Auth/EmailVerificationTest.php
+
+		-
+			message: "#^Cannot call method hasVerifiedEmail\\(\\) on App\\\\Models\\\\User\\|null\\.$#"
+			count: 2
+			path: tests/Feature/Auth/EmailVerificationTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:actingAs\\(\\)\\.$#"
+			count: 3
+			path: tests/Feature/Auth/PasswordConfirmationTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:get\\(\\)\\.$#"
+			count: 2
+			path: tests/Feature/Auth/PasswordResetTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:actingAs\\(\\)\\.$#"
+			count: 2
+			path: tests/Feature/Auth/PasswordUpdateTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:assertAuthenticated\\(\\)\\.$#"
+			count: 1
+			path: tests/Feature/Auth/RegistrationTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:get\\(\\)\\.$#"
+			count: 1
+			path: tests/Feature/Auth/RegistrationTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:get\\(\\)\\.$#"
+			count: 1
+			path: tests/Feature/ExampleTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:actingAs\\(\\)\\.$#"
+			count: 5
+			path: tests/Feature/ProfileTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:assertGuest\\(\\)\\.$#"
+			count: 1
+			path: tests/Feature/ProfileTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:get\\(\\)\\.$#"
+			count: 1
+			path: tests/Feature/ProfileTest.php
+
+		-
+			message: "#^Function something\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: tests/Pest.php
+
+		-
+			message: "#^Undefined variable\\: \\$this$#"
+			count: 1
+			path: tests/Pest.php
