@@ -13,6 +13,7 @@ parameters:
         - vendor
         - storage
         - bootstrap/cache
+        - tests/Arch/*
     treatPhpDocTypesAsCertain: false
     checkMissingIterableValueType: true
     checkGenericClassInNonGenericObjectType: true

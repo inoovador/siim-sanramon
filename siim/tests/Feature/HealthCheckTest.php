@@ -10,8 +10,8 @@ it('responde /health con status ok y nombre SIIM', function () {
     $response->assertOk()
         ->assertJsonStructure(['status', 'app', 'version', 'timestamp'])
         ->assertJson([
-            'status'  => 'ok',
-            'app'     => 'SIIM',
+            'status' => 'ok',
+            'app' => 'SIIM',
             'version' => '0.1.0-F0',
         ]);
 });

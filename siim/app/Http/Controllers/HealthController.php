@@ -11,9 +11,9 @@ final class HealthController extends Controller
     public function __invoke(): JsonResponse
     {
         return new JsonResponse([
-            'status'    => 'ok',
-            'app'       => config('app.name'),
-            'version'   => '0.1.0-F0',
+            'status' => 'ok',
+            'app' => config('app.name'),
+            'version' => '0.1.0-F0',
             'timestamp' => now()->toIso8601String(),
         ]);
     }
