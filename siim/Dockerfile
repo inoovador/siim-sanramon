@@ -20,3 +20,4 @@ RUN chown -R nobody:nobody storage bootstrap/cache && chmod -R 775 storage boots
 EXPOSE 80
 
 CMD ["sh","-c","php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan migrate --force && php artisan db:seed --force --class=Database\\\\Seeders\\\\DatabaseSeeder && php -S 0.0.0.0:80 -t public"]
+# rebuild 1779399163
