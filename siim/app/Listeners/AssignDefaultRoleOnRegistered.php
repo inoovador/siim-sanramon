@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Contracts\Auth\Authenticatable;
 use SIIM\Application\Identity\UseCases\AssignDefaultRole;
 
 final class AssignDefaultRoleOnRegistered
@@ -13,6 +14,8 @@ final class AssignDefaultRoleOnRegistered
 
     public function handle(Registered $event): void
     {
-        $this->useCase->handle((string) $event->user->getKey());
+        /** @var Authenticatable $user */
+        $user = $event->user;
+        $this->useCase->handle((string) $user->getAuthIdentifier());
     }
 }

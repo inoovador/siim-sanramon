@@ -16,6 +16,96 @@ parameters:
 			path: app/Http/Controllers/Auth/VerifyEmailController.php
 
 		-
+			message: "#^Cannot cast mixed to string\\.$#"
+			count: 1
+			path: app/Listeners/AssignDefaultRoleOnRegistered.php
+
+		-
+			message: "#^Cannot access offset 'model_has_roles' on mixed\\.$#"
+			count: 2
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Cannot access offset 'model_has…' on mixed\\.$#"
+			count: 2
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Cannot access offset 'model_morph_key' on mixed\\.$#"
+			count: 8
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Cannot access offset 'permission_pivot_key' on mixed\\.$#"
+			count: 1
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Cannot access offset 'permissions' on mixed\\.$#"
+			count: 4
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Cannot access offset 'role_has_permissions' on mixed\\.$#"
+			count: 2
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Cannot access offset 'role_pivot_key' on mixed\\.$#"
+			count: 1
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Cannot access offset 'roles' on mixed\\.$#"
+			count: 4
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Cannot access offset 'team_foreign_key' on mixed\\.$#"
+			count: 10
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Parameter \\#1 \\$column of method Illuminate\\\\Database\\\\Schema\\\\Blueprint\\:\\:unsignedBigInteger\\(\\) expects string, mixed given\\.$#"
+			count: 9
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Parameter \\#1 \\$columns of method Illuminate\\\\Database\\\\Schema\\\\Blueprint\\:\\:foreign\\(\\) expects array\\|string, mixed given\\.$#"
+			count: 4
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Parameter \\#1 \\$columns of method Illuminate\\\\Database\\\\Schema\\\\Blueprint\\:\\:index\\(\\) expects array\\|string, mixed given\\.$#"
+			count: 3
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Parameter \\#1 \\$key of method Illuminate\\\\Contracts\\\\Cache\\\\Repository\\:\\:forget\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method Illuminate\\\\Cache\\\\CacheManager\\:\\:store\\(\\) expects string\\|null, mixed given\\.$#"
+			count: 1
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Parameter \\#1 \\$table of method Illuminate\\\\Database\\\\Schema\\\\ForeignKeyDefinition\\:\\:on\\(\\) expects string, mixed given\\.$#"
+			count: 4
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Parameter \\#1 \\$table of static method Illuminate\\\\Support\\\\Facades\\\\Schema\\:\\:create\\(\\) expects string, mixed given\\.$#"
+			count: 5
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
+			message: "#^Parameter \\#1 \\$table of static method Illuminate\\\\Support\\\\Facades\\\\Schema\\:\\:drop\\(\\) expects string, mixed given\\.$#"
+			count: 5
+			path: database/migrations/2026_05_21_134128_create_permission_tables.php
+
+		-
 			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:actingAs\\(\\)\\.$#"
 			count: 2
 			path: tests/Feature/Auth/AuthenticationTest.php
@@ -71,9 +161,24 @@ parameters:
 			path: tests/Feature/Auth/RegistrationTest.php
 
 		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:seed\\(\\)\\.$#"
+			count: 1
+			path: tests/Feature/Auth/RegistrationTest.php
+
+		-
 			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:get\\(\\)\\.$#"
 			count: 1
 			path: tests/Feature/ExampleTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:seed\\(\\)\\.$#"
+			count: 1
+			path: tests/Feature/Identity/RegisterAssignsCitizenRoleTest.php
+
+		-
+			message: "#^Cannot call method hasRole\\(\\) on App\\\\Models\\\\User\\|null\\.$#"
+			count: 1
+			path: tests/Feature/Identity/RegisterAssignsCitizenRoleTest.php
 
 		-
 			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:actingAs\\(\\)\\.$#"
