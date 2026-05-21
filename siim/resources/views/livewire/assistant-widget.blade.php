@@ -45,7 +45,7 @@
                     <p class="font-serif font-semibold leading-tight">Asistente SIIM</p>
                     <p class="text-[11px] opacity-80 flex items-center gap-1.5">
                         <span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-                        En línea · GLM 5.1 vía NVIDIA
+                        En línea · Llama 3.1 vía NVIDIA
                     </p>
                 </div>
                 <button wire:click="reset_chat" type="button" class="text-white/70 hover:text-white p-1.5 rounded-md hover:bg-white/10" title="Reiniciar conversación">

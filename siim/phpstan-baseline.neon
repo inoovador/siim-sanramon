@@ -21,6 +21,26 @@ parameters:
 			path: app/Listeners/AssignDefaultRoleOnRegistered.php
 
 		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 1
+			path: app/Livewire/AssistantWidget.php
+
+		-
+			message: "#^Cannot cast mixed to string\\.$#"
+			count: 1
+			path: app/Livewire/AssistantWidget.php
+
+		-
+			message: "#^Method App\\\\Livewire\\\\AssistantWidget\\:\\:render\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/Livewire/AssistantWidget.php
+
+		-
+			message: "#^Property App\\\\Livewire\\\\AssistantWidget\\:\\:\\$history \\(array\\<int, array\\{role\\: string, content\\: string, at\\: string\\}\\>\\) does not accept mixed\\.$#"
+			count: 1
+			path: app/Livewire/AssistantWidget.php
+
+		-
 			message: "#^Cannot access offset 'model_has_roles' on mixed\\.$#"
 			count: 2
 			path: database/migrations/2026_05_21_134128_create_permission_tables.php
@@ -106,6 +126,61 @@ parameters:
 			path: database/migrations/2026_05_21_134128_create_permission_tables.php
 
 		-
+			message: "#^Cannot access offset 'choices' on mixed\\.$#"
+			count: 1
+			path: src/Infrastructure/Llm/NvidiaGlmAssistant.php
+
+		-
+			message: "#^Cannot access offset 'completion_tokens' on mixed\\.$#"
+			count: 1
+			path: src/Infrastructure/Llm/NvidiaGlmAssistant.php
+
+		-
+			message: "#^Cannot access offset 'content' on mixed\\.$#"
+			count: 1
+			path: src/Infrastructure/Llm/NvidiaGlmAssistant.php
+
+		-
+			message: "#^Cannot access offset 'message' on mixed\\.$#"
+			count: 1
+			path: src/Infrastructure/Llm/NvidiaGlmAssistant.php
+
+		-
+			message: "#^Cannot access offset 'model' on mixed\\.$#"
+			count: 1
+			path: src/Infrastructure/Llm/NvidiaGlmAssistant.php
+
+		-
+			message: "#^Cannot access offset 'prompt_tokens' on mixed\\.$#"
+			count: 1
+			path: src/Infrastructure/Llm/NvidiaGlmAssistant.php
+
+		-
+			message: "#^Cannot access offset 'usage' on mixed\\.$#"
+			count: 1
+			path: src/Infrastructure/Llm/NvidiaGlmAssistant.php
+
+		-
+			message: "#^Cannot access offset 0 on mixed\\.$#"
+			count: 1
+			path: src/Infrastructure/Llm/NvidiaGlmAssistant.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 2
+			path: src/Infrastructure/Llm/NvidiaGlmAssistant.php
+
+		-
+			message: "#^Parameter \\$content of class SIIM\\\\Application\\\\Shared\\\\Contracts\\\\AssistantReply constructor expects string, mixed given\\.$#"
+			count: 1
+			path: src/Infrastructure/Llm/NvidiaGlmAssistant.php
+
+		-
+			message: "#^Parameter \\$model of class SIIM\\\\Application\\\\Shared\\\\Contracts\\\\AssistantReply constructor expects string, mixed given\\.$#"
+			count: 1
+			path: src/Infrastructure/Llm/NvidiaGlmAssistant.php
+
+		-
 			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:actingAs\\(\\)\\.$#"
 			count: 2
 			path: tests/Feature/Auth/AuthenticationTest.php
@@ -182,6 +257,21 @@ parameters:
 
 		-
 			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:actingAs\\(\\)\\.$#"
+			count: 3
+			path: tests/Feature/Panel/PanelPagesTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:get\\(\\)\\.$#"
+			count: 5
+			path: tests/Feature/Panel/PanelPagesTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:seed\\(\\)\\.$#"
+			count: 1
+			path: tests/Feature/Panel/PanelPagesTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:actingAs\\(\\)\\.$#"
 			count: 5
 			path: tests/Feature/ProfileTest.php
 
@@ -196,19 +286,29 @@ parameters:
 			path: tests/Feature/ProfileTest.php
 
 		-
-			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:seed\\(\\)\\.$#"
-			count: 1
-			path: tests/Feature/Panel/PanelPagesTest.php
+			message: "#^Access to an undefined property PHPUnit\\\\Framework\\\\TestCase\\:\\:\\$admin\\.$#"
+			count: 11
+			path: tests/Feature/QA/QaSweepTest.php
+
+		-
+			message: "#^Access to an undefined property PHPUnit\\\\Framework\\\\TestCase\\:\\:\\$analyst\\.$#"
+			count: 2
+			path: tests/Feature/QA/QaSweepTest.php
 
 		-
 			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:actingAs\\(\\)\\.$#"
-			count: 3
-			path: tests/Feature/Panel/PanelPagesTest.php
+			count: 11
+			path: tests/Feature/QA/QaSweepTest.php
 
 		-
 			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:get\\(\\)\\.$#"
-			count: 5
-			path: tests/Feature/Panel/PanelPagesTest.php
+			count: 12
+			path: tests/Feature/QA/QaSweepTest.php
+
+		-
+			message: "#^Call to an undefined method PHPUnit\\\\Framework\\\\TestCase\\:\\:seed\\(\\)\\.$#"
+			count: 1
+			path: tests/Feature/QA/QaSweepTest.php
 
 		-
 			message: "#^Function something\\(\\) has no return type specified\\.$#"

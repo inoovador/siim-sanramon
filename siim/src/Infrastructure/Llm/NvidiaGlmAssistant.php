@@ -31,7 +31,7 @@ final class NvidiaGlmAssistant implements AssistantProvider
             ->acceptJson()
             ->asJson()
             ->withOptions(['verify' => $this->verifySsl])
-            ->post($this->baseUrl.'/chat/completions', [
+            ->post($this->baseUrl . '/chat/completions', [
                 'model' => $this->model,
                 'messages' => $messages,
                 'temperature' => 0.7,
@@ -53,7 +53,7 @@ final class NvidiaGlmAssistant implements AssistantProvider
         $usage = $payload['usage'] ?? [];
 
         if ($content === '') {
-            throw new RuntimeException('NVIDIA API respondió sin contenido: '.$response->body());
+            throw new RuntimeException('NVIDIA API respondió sin contenido: ' . $response->body());
         }
 
         return new AssistantReply(

@@ -11,8 +11,7 @@ final class AssistantChatUseCase
 {
     public function __construct(
         private readonly AssistantProvider $provider,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  list<array{role:string, content:string}>  $history

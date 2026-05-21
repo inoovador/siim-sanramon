@@ -11,6 +11,5 @@ final class AssistantReply
         public readonly int $tokensInput,
         public readonly int $tokensOutput,
         public readonly string $model,
-    ) {
-    }
+    ) {}
 }
