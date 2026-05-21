@@ -1,0 +1,52 @@
+services:
+  app:
+    build:
+      context: .
+      target: runtime
+    container_name: siim-app
+    depends_on:
+      - mariadb
+      - redis
+      - meilisearch
+    volumes:
+      - ./:/var/www/html
+    environment:
+      DB_HOST: mariadb
+      REDIS_HOST: redis
+      MEILISEARCH_HOST: http://meilisearch:7700
+    ports:
+      - "9000:9000"
+
+  mariadb:
+    image: mariadb:11
+    container_name: siim-mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: secret
+      MARIADB_DATABASE: siim
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    container_name: siim-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.10
+    container_name: siim-meilisearch
+    environment:
+      MEILI_NO_ANALYTICS: 'true'
+    ports:
+      - "7700:7700"
+    volumes:
+      - meili-data:/meili_data
+
+volumes:
+  mariadb-data:
+  redis-data:
+  meili-data:
