@@ -1,6 +1,6 @@
-app/
-update/
-logo/
+/app/
+/update/
+/logo/
 *.docx
 *.pdf
 node_modules/
