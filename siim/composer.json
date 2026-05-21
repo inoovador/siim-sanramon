@@ -30,7 +30,10 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "Database\\Seeders\\": "database/seeders/",
+            "SIIM\\Domain\\": "src/Domain/",
+            "SIIM\\Application\\": "src/Application/",
+            "SIIM\\Infrastructure\\": "src/Infrastructure/"
         }
     },
     "autoload-dev": {
@@ -57,6 +60,19 @@
         "dev": [
             "Composer\\Config::disableProcessTimeout",
             "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite"
+        ],
+        "lint": "vendor/bin/pint",
+        "lint:test": "vendor/bin/pint --test",
+        "analyse": "vendor/bin/phpstan analyse --memory-limit=2G",
+        "test": "@php artisan test",
+        "test:arch": "vendor/bin/pest --group=arch",
+        "test:cov": "vendor/bin/pest --coverage --min=70",
+        "deptrac": "vendor/bin/deptrac analyse --config-file=deptrac.yaml",
+        "check": [
+            "@lint:test",
+            "@analyse",
+            "@deptrac",
+            "@test"
         ]
     },
     "extra": {
