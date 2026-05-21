@@ -30,36 +30,65 @@ mount(function () {
 
 $send = function () {
     $text = trim($this->input);
-    if ($text === '' || $this->waiting) return;
-
-    $this->messages[] = [
-        'role'    => 'user',
-        'content' => $text,
-        'time'    => now()->format('H:i'),
-    ];
-    $this->input   = '';
-    $this->waiting = true;
-
-    $lower = mb_strtolower($text);
-
-    if (str_contains($lower, 'obras')) {
-        $reply = 'Detecté 38 menciones de Obras públicas en los últimos 7 días — 60% positivas (parque infantil, pavimentación), 25% negativas (av. Marginal), 15% neutrales (consultas).';
-    } elseif (str_contains($lower, 'seguridad')) {
-        $reply = 'Las menciones de seguridad ciudadana suben 12% esta semana. 70% positivas (operativos), 30% negativas (alumbrado deficiente).';
-    } elseif (str_contains($lower, 'salud')) {
-        $reply = 'La campaña de salud preventiva genera 85% sentimiento positivo. 18 menciones, principalmente sobre vacunación y postas.';
-    } elseif (str_contains($lower, 'negativ') || str_contains($lower, 'problemas') || str_contains($lower, 'reclam') || str_contains($lower, 'quejas')) {
-        $reply = 'Los 3 principales reclamos son: 1) Alumbrado público (12 menciones), 2) Pavimento av. Marginal (9), 3) Recolección residuos calle Junín (7).';
-    } elseif (str_contains($lower, 'positiv') || str_contains($lower, 'felicit') || str_contains($lower, 'elogio')) {
-        $reply = 'Top 3 elogios: 1) Plaza nueva (15 menciones), 2) Operativos seguridad (11), 3) Campañas salud (8).';
-    } else {
-        $reply = 'Procesé tu consulta sobre comentarios filtrados. Encontré 247 comentarios en el rango seleccionado. ¿Quieres que profundice en algún tema específico?';
+    if ($text === '' || $this->waiting) {
+        return;
     }
 
     $this->messages[] = [
-        'role'    => 'assistant',
+        'role' => 'user',
+        'content' => $text,
+        'time' => now()->format('H:i'),
+    ];
+    $this->input = '';
+    $this->waiting = true;
+
+    // Normalizar: lowercase + remover tildes para matchear con typos comunes
+    $normalized = mb_strtolower(strtr($text, [
+        'á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ñ' => 'n',
+    ]));
+
+    $any = fn (array $needles): bool => collect($needles)->contains(
+        fn (string $n): bool => str_contains($normalized, $n)
+    );
+
+    if ($any(['hola', 'buenos dias', 'buenas', 'que tal', 'saludos', 'hey'])) {
+        $reply = '¡Hola! Soy el asistente RAG del SIIM. Puedo analizar lo que dice la ciudadanía sobre cualquier tema — obras, seguridad, salud, limpieza, etc. ¿Sobre qué quiere saber hoy?';
+    } elseif ($any(['obras', 'orbas', 'obra', 'pavimento', 'pavimentacion', 'pista', 'plaza', 'parque', 'infraestructura'])) {
+        $reply = "Sobre **Obras públicas** (últimos 7 días):\n• 38 menciones totales\n• 60% positivas → parque infantil del barrio La Esperanza, pavimentación de la av. La Marginal\n• 25% negativas → estado del pavimento en sectores periféricos, demora en cierre de zanjas\n• 15% neutrales → consultas sobre cronograma\nTrending: parques + alumbrado.";
+    } elseif ($any(['seguridad', 'segurida', 'serenazgo', 'delincuencia', 'robo', 'patrullaje', 'operativo'])) {
+        $reply = "Sobre **Seguridad ciudadana**:\n• 27 menciones, sube 12% vs semana pasada\n• 70% positivas → operativos del serenazgo, presencia visible en plazas\n• 30% negativas → tramos sin alumbrado en jirón Tarma y sector La Florida\nSugerencia: priorizar respuesta en los 2 sectores citados.";
+    } elseif ($any(['salud', 'postas', 'vacuna', 'medico', 'centro de salud'])) {
+        $reply = "Sobre **Salud**:\n• 18 menciones, 85% positivas\n• Tópicos top: campaña de vacunación, posta médica El Milagro, atención en consulta externa\n• Negativos: 2 menciones sobre horarios limitados\nSentimiento general muy favorable.";
+    } elseif ($any(['limpieza', 'basura', 'residuos', 'recoleccion', 'recojo'])) {
+        $reply = "Sobre **Limpieza pública**:\n• 22 menciones, sentimiento mixto\n• Quejas principales: recolección irregular en calle Junín y jirón Cusco (7 menciones)\n• Elogios: limpieza mercado central post-feria\n• Trending: ↓ desde el miércoles tras nuevo cronograma.";
+    } elseif ($any(['tributo', 'impuesto', 'predial', 'arbitrio', 'pago'])) {
+        $reply = "Sobre **Tributos municipales**:\n• 14 menciones, mayormente neutrales (consultas)\n• Top consultas: dónde pagar predial, horarios banco municipal, descuentos vigentes\n• 3 quejas sobre cola en ventanilla.";
+    } elseif ($any(['educacion', 'taller', 'beca', 'biblioteca'])) {
+        $reply = "Sobre **Educación**:\n• 11 menciones, 80% positivas\n• Más mencionado: talleres municipales de verano, biblioteca municipal\n• 2 sugerencias para extender horario sabatino.";
+    } elseif ($any(['transporte', 'transito', 'semaforo', 'paradero', 'colectivo'])) {
+        $reply = "Sobre **Transporte**:\n• 9 menciones, sentimiento negativo (60%)\n• Reclamo top: falta de semáforo intersección Sucre/Tarapacá\n• 3 quejas sobre paraderos sin techo.";
+    } elseif ($any(['ambiente', 'reciclaje', 'arboles', 'agua', 'rio'])) {
+        $reply = "Sobre **Medio ambiente**:\n• 7 menciones, 70% positivas\n• Elogios al programa de reciclaje y siembra de árboles\n• 2 alertas sobre contaminación visible en quebrada local.";
+    } elseif ($any(['negativ', 'problemas', 'reclam', 'queja', 'critica', 'mal', 'mlas', 'malas'])) {
+        $reply = "**Top 5 reclamos esta semana:**\n1) Alumbrado público apagado en jirón Tarma (12)\n2) Pavimento av. La Marginal en mal estado (9)\n3) Recolección residuos irregular calle Junín (7)\n4) Falta de semáforo intersección Sucre/Tarapacá (5)\n5) Cola en ventanilla tributos (3)";
+    } elseif ($any(['positiv', 'felicit', 'elogio', 'gracias', 'buena gestion'])) {
+        $reply = "**Top 5 elogios esta semana:**\n1) Nueva plaza del barrio La Esperanza (15)\n2) Operativos de seguridad ciudadana (11)\n3) Campañas de salud preventiva (8)\n4) Talleres municipales de verano (6)\n5) Limpieza del mercado central (4)";
+    } elseif ($any(['cuanto', 'cuantos', 'total', 'numero', 'cantidad', 'estadistica'])) {
+        $reply = "**Estadísticas del rango aplicado:**\n• Comentarios totales: 247\n• Positivos: 158 (64%)\n• Neutrales: 56 (23%)\n• Negativos: 33 (13%)\n• Canal top: Facebook (118)\n• Tema más recurrente: Obras públicas (38)";
+    } elseif ($any(['facebook', 'fb'])) {
+        $reply = "**Comentarios desde Facebook** (últimos 7 días):\n• 118 menciones (47% del total)\n• Sentimiento: 70% positivo, 18% neutral, 12% negativo\n• Posts con más engagement: anuncios de obras + agenda cultural municipal.";
+    } elseif ($any(['instagram', 'ig'])) {
+        $reply = "**Instagram** muestra una audiencia más joven:\n• 76 menciones\n• 85% positivas, sobre todo en publicaciones de eventos culturales y deportivos\n• Negativos limitados a 5 menciones sobre demora en respuestas a DMs.";
+    } elseif (mb_strlen($normalized) < 5) {
+        $reply = 'Necesito un poco más de contexto para ayudarle. Pregunte por algún tema (obras, seguridad, salud, limpieza, tributos, educación, transporte, medio ambiente) o pida estadísticas generales.';
+    } else {
+        $reply = "No identifiqué un tema específico en su consulta sobre \"" . mb_strimwidth($text, 0, 60, '…') . "\".\n\nPruebe con palabras clave como: obras, seguridad, salud, limpieza, reclamos, elogios, estadísticas, o el nombre de un canal (Facebook, Instagram). También puede usar los atajos rápidos del panel izquierdo.";
+    }
+
+    $this->messages[] = [
+        'role' => 'assistant',
         'content' => $reply,
-        'time'    => now()->format('H:i'),
+        'time' => now()->format('H:i'),
     ];
     $this->waiting = false;
 };
