@@ -1,0 +1,74 @@
+deptrac:
+  paths:
+    - ./src
+    - ./app
+  exclude_files:
+    - '#.*test.*#i'
+
+  layers:
+    - name: Domain
+      collectors:
+        - type: classLike
+          value: SIIM\\Domain\\.*
+
+    - name: Application
+      collectors:
+        - type: classLike
+          value: SIIM\\Application\\.*
+
+    - name: Infrastructure
+      collectors:
+        - type: classLike
+          value: SIIM\\Infrastructure\\.*
+
+    - name: Http
+      collectors:
+        - type: classLike
+          value: App\\Http\\.*
+
+    - name: Context_Identity
+      collectors:
+        - type: classLike
+          value: SIIM\\(Domain|Application)\\Identity\\.*
+
+    - name: Context_Citizen
+      collectors:
+        - type: classLike
+          value: SIIM\\(Domain|Application)\\Citizen\\.*
+
+    - name: Context_Ingestion
+      collectors:
+        - type: classLike
+          value: SIIM\\(Domain|Application)\\Ingestion\\.*
+
+    - name: Context_Analysis
+      collectors:
+        - type: classLike
+          value: SIIM\\(Domain|Application)\\Analysis\\.*
+
+    - name: Context_Conversation
+      collectors:
+        - type: classLike
+          value: SIIM\\(Domain|Application)\\Conversation\\.*
+
+    - name: Context_Reporting
+      collectors:
+        - type: classLike
+          value: SIIM\\(Domain|Application)\\Reporting\\.*
+
+  ruleset:
+    Domain: []
+    Application:
+      - Domain
+    Infrastructure:
+      - Application
+      - Domain
+    Http:
+      - Application
+
+    Context_Identity: []
+    Context_Citizen: []
+    Context_Ingestion: []
+    Context_Analysis: []
+    Context_Conversation: []
+    Context_Reporting: []
