@@ -36,23 +36,28 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
-    </div>
+    <header class="text-center mb-6">
+        <h2 class="text-2xl font-serif font-bold text-brand-canopy">Verifica tu correo</h2>
+        <p class="mt-1 text-sm text-ink-soft">Un paso más antes de continuar</p>
+    </header>
+
+    <p class="mb-4 text-sm text-ink-soft">
+        {{ __('Gracias por registrarte. Antes de comenzar, verifica tu dirección de correo haciendo clic en el enlace que te enviamos. Si no lo recibiste, podemos enviarte otro.') }}
+    </p>
 
     @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
+        <div class="mb-4 font-medium text-sm text-green-600">
+            {{ __('Se ha enviado un nuevo enlace de verificación a tu correo electrónico.') }}
         </div>
     @endif
 
-    <div class="mt-4 flex items-center justify-between">
-        <x-primary-button wire:click="sendVerification">
-            {{ __('Resend Verification Email') }}
-        </x-primary-button>
+    <div class="mt-4 flex items-center justify-between gap-3">
+        <button wire:click="sendVerification" class="btn-primary py-2.5 px-4">
+            {{ __('Reenviar verificación') }}
+        </button>
 
-        <button wire:click="logout" type="submit" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-            {{ __('Log Out') }}
+        <button wire:click="logout" type="button" class="text-sm text-ink-soft hover:text-brand-clay underline">
+            {{ __('Cerrar sesión') }}
         </button>
     </div>
 </div>

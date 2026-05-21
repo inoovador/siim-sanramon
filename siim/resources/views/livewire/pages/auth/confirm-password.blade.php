@@ -34,29 +34,20 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
-    </div>
+    <header class="text-center mb-6">
+        <h2 class="text-2xl font-serif font-bold text-brand-canopy">Confirma tu contraseña</h2>
+        <p class="mt-1 text-sm text-ink-soft">Zona segura — verifica tu identidad para continuar</p>
+    </header>
 
-    <form wire:submit="confirmPassword">
-        <!-- Password -->
+    <form wire:submit="confirmPassword" class="space-y-5">
         <div>
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input wire:model="password"
-                          id="password"
-                          class="block mt-1 w-full"
-                          type="password"
-                          name="password"
-                          required autocomplete="current-password" />
-
+            <x-input-label for="password" :value="__('Contraseña')" class="text-ink-deep font-medium" />
+            <x-text-input wire:model="password" id="password" class="block mt-1 w-full rounded-lg border-gray-300 focus:border-brand-canopy focus:ring-brand-canopy" type="password" name="password" required autocomplete="current-password" />
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <div class="flex justify-end mt-4">
-            <x-primary-button>
-                {{ __('Confirm') }}
-            </x-primary-button>
-        </div>
+        <button type="submit" class="w-full btn-primary justify-center py-2.5">
+            Confirmar
+        </button>
     </form>
 </div>
