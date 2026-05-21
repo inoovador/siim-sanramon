@@ -126,6 +126,8 @@ Ingestion → publica CommentIngested
                               listener Search   → indexa en Meilisearch
 ```
 
+**Transport de eventos**: Domain Events corren **síncronos in-process** (Laravel event dispatcher por defecto). El boundary asíncrono es el **dispatch del Job desde el listener** (`ShouldQueue` jobs vía Redis). Esto significa: publicar un evento es barato, pero el trabajo pesado (LLM, search indexing) va a cola. Garantía: si el evento dispara y el job falla al encolar, la transacción del comando original ya commiteó — usamos `DB::afterCommit()` en listeners que despachen jobs para que solo se despachen si la persistencia tuvo éxito.
+
 ---
 
 ## 3. Modelo de Dominio (entidades + invariantes)
@@ -381,7 +383,8 @@ users (id uuid PK, name, email UNIQUE, password, is_active, created_at, ...)
 comments (
   id           uuid PK,
   text         text NOT NULL,
-  text_hash    char(64) NOT NULL,
+  text_hash    char(64) NOT NULL,         -- SHA-256(lower(trim(text))) — analysis cache key
+  dedupe_hash  char(64) NULL,             -- SHA-256(lower(trim(text)) || '|' || lower(author_alias)) — CSV/web dedupe
   channel      enum(...) NOT NULL,
   source_ref   varchar(255) NOT NULL,
   external_id  varchar(191) NULL,
@@ -391,11 +394,16 @@ comments (
   captured_at  datetime NOT NULL,
   redacted_at  datetime NULL,
   created_at   datetime,
-  UNIQUE KEY (channel, external_id),
+  UNIQUE KEY (channel, external_id),       -- external_id NULL en web_form/csv/public_chatbot: MariaDB permite múltiples NULL en UNIQUE compuesto
   INDEX (channel, captured_at),
   INDEX (text_hash),
+  INDEX (dedupe_hash),
   FULLTEXT KEY ft_text (text)
 );
+
+-- Dedupe rules por canal:
+--   meta_facebook / meta_instagram → external_id (Meta comment_id) → UNIQUE constraint hace dedupe automático
+--   web_form / csv_upload / public_chatbot → external_id NULL, dedupe vía dedupe_hash check antes de insert
 
 -- INGESTION
 ingestion_runs (
@@ -630,18 +638,18 @@ Autenticado /panel (post-login)
 
 | Fase | Duración est. | Entregables |
 |---|---|---|
-| **F0 Scaffold** | 2 días | Wipe `app/` actual, nuevo Laravel 11 + Livewire + Breeze, paleta + design tokens, Deptrac base, CI verde |
+| **F0 Scaffold** | 2 días | Crear nuevo proyecto Laravel 11 en `siim/` (NO sobrescribir `app/` — coexisten hasta validar F1), instalar Livewire 3 + Volt + Breeze, paleta + design tokens, Deptrac base con 6 contextos, CI verde con `composer check`. Mover/borrar `app/` solo al cerrar F1 con go. |
 | **F1 Identity + base** | 3 días | Spatie roles, login, layout admin, dashboard vacío con KPIs mock, landing pública |
 | **F2 Citizen + Ingestion CSV** | 4 días | Modelo Comment, CSV upload + parser, Domain events, listado básico |
-| **F3 Analysis + LLM Strategy** | 5 días | LlmProvider interface + 2 adapters (Gemini default + Claude fallback), AnalyzeCommentJob, prompts versionados, cost guard, Horizon |
-| **F4 Ingestion Web Form + Public Chatbot** | 4 días | Buzón ciudadano + Turnstile, PublicChatbot Livewire, transcript→Comment, antispam |
+| **F3 Analysis + LLM Strategy** | 7 días | LlmProvider interface + 2 adapters (Gemini default + Claude fallback) con structured outputs, AnalyzeCommentJob (retry + backoff + idempotencia por text_hash cache), prompts versionados con tests JSON-schema, cost guard daily budget, Horizon dashboard, fake provider para tests |
+| **F4 Ingestion Web Form + Public Chatbot** | 4 días | Buzón ciudadano + Turnstile, PublicChatbot Livewire, transcript→Comment, antispam, **política Ley 29733 Perú**: retención configurable (default 12 meses), endpoint `/api/v1/citizen/data-deletion-request`, `redactedAt` semantics (scrub `text` a `[REDACTED]` + null `author_contact_encrypted`, preservar agregados anónimos) |
 | **F5 Ingestion Meta Graph API** | 4 días | OAuth Meta, FetchMetaCommentsJob, scheduled, status UI |
 | **F6 RAG Chatbot Interno** | 4 días | Meilisearch sync, RagChatUseCase + tools, streaming UI con Reverb, citations |
 | **F7 Reporting + Export PDF/Excel** | 4 días | Dashboard charts ApexCharts, filtros, PDF Browsershot, Excel maatwebsite |
-| **F8 Hardening + Deploy** | 3 días | A11y audit, performance budget, security audit, Coolify deploy, smoke tests prod |
+| **F8 Hardening + Deploy** | 1 día | A11y audit, performance budget, security audit, Coolify deploy (reusando setup `app.syxweb.com`), smoke tests prod (estimate trimmed — slack absorbed por F3) |
 | **F9 Demo & Documentación SENATI** | 2 días | Manual usuario, video demo, presentación, anexos para tesis |
 
-**Total estimado**: ~35 días de trabajo dedicado.
+**Total estimado**: ~35 días de trabajo dedicado (re-balanceado tras spec review: F3 +2, F8 -2).
 
 ### Riesgos & mitigaciones
 
