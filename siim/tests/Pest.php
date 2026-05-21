@@ -50,3 +50,5 @@ function something()
 {
     // ..
 }
+
+uses()->group('arch')->in('Arch');
