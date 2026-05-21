@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Auth;
 
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Livewire\Volt\Volt;
 
 test('registration screen can be rendered', function () {
@@ -15,6 +16,8 @@ test('registration screen can be rendered', function () {
 });
 
 test('new users can register', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+
     $component = Volt::test('pages.auth.register')
         ->set('name', 'Test User')
         ->set('email', 'test@example.com')
