@@ -1,6 +1,9 @@
 <?php
 
 use function Livewire\Volt\state;
+use function Livewire\Volt\title;
+
+title('Dashboard · SIIM');
 
 state([
     'kpis' => fn () => [
@@ -42,7 +45,11 @@ state([
 
 ?>
 
-<x-layouts.app title="Dashboard" :breadcrumb="['SIIM', 'Dashboard']">
+<div>
+    {{-- Page heading --}}
+    <div class="mb-6">
+        <h1 class="text-2xl font-serif font-bold text-brand-canopy">Dashboard</h1>
+    </div>
 
     {{-- KPI cards --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -200,4 +207,4 @@ state([
         });
     </script>
     @endpush
-</x-layouts.app>
+</div>

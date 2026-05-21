@@ -1,5 +1,12 @@
-<?php ?>
-<x-layouts.app title="Chat RAG interno" :breadcrumb="['SIIM', 'Chat RAG']">
+<?php
+
+use function Livewire\Volt\title;
+
+title('Chat RAG interno · SIIM');
+
+?>
+
+<div>
     <div class="card text-center py-16">
         <div class="w-20 h-20 mx-auto bg-brand-canopy/10 rounded-full flex items-center justify-center text-brand-canopy mb-4">
             <x-icon name="brain" class="w-10 h-10" />
@@ -8,4 +15,4 @@
         <p class="mt-2 text-sm text-ink-soft max-w-md mx-auto">Pregunta en lenguaje natural sobre los datos analizados — F6.</p>
         <a href="/panel" class="mt-6 inline-flex btn-primary">Volver al dashboard</a>
     </div>
-</x-layouts.app>
+</div>
