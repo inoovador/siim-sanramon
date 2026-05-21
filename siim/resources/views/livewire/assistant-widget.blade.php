@@ -1,4 +1,15 @@
-<div class="fixed bottom-6 right-6 z-50" x-data="{ scrollBottom() { this.$nextTick(() => { const m = this.$refs.messages; if (m) m.scrollTop = m.scrollHeight; }); } }" x-init="$watch('$wire.history', () => scrollBottom()); $watch('$wire.isOpen', v => v && scrollBottom())">
+<div
+    class="fixed bottom-6 right-6 z-50"
+    x-data="{
+        scrollBottom() { this.$nextTick(() => { const m = this.$refs.messages; if (m) m.scrollTop = m.scrollHeight; }); }
+    }"
+    x-init="
+        $watch('$wire.history', () => scrollBottom());
+        $watch('$wire.isOpen', v => v && scrollBottom());
+        $watch('$wire.waiting', () => scrollBottom());
+    "
+    @assistant:fetch-reply.window="setTimeout(() => $wire.fetchReply(), 80)"
+>
 
     {{-- Floating Action Button --}}
     @if(! $isOpen)

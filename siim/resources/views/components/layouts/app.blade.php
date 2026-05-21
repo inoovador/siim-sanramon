@@ -6,6 +6,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ $title ? $title . ' · ' : '' }}{{ config('app.name', 'SIIM') }}</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
@@ -14,7 +16,7 @@
         {{-- Sidebar --}}
         <aside class="w-64 bg-white border-r border-brand-canopy/10 flex flex-col flex-shrink-0">
             <div class="h-20 flex items-center gap-3 px-5 border-b border-brand-canopy/10">
-                <img src="/images/logo-san-ramon.png" alt="Municipalidad San Ramón" class="h-12 w-auto flex-shrink-0" />
+                <img src="/images/logo-siim.png" alt="Municipalidad San Ramón" class="h-12 w-auto flex-shrink-0" />
                 <div class="min-w-0">
                     <p class="font-serif font-bold text-brand-canopy leading-tight">SIIM</p>
                     <p class="text-[9px] text-ink-soft uppercase tracking-wider leading-tight">Imagen Municipal<br/>San Ramón</p>

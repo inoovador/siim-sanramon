@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ config('app.name', 'SIIM') }}</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased text-ink-deep bg-gradient-to-br from-brand-mist via-[#EDE8DC] to-[#DDE7E0] min-h-screen flex items-center justify-center p-4 lg:p-8">
@@ -19,7 +21,7 @@
 
             <div class="relative">
                 <div class="flex items-center gap-3">
-                    <img src="/images/logo-san-ramon.png" alt="Municipalidad San Ramón" class="h-14 w-auto" />
+                    <img src="/images/logo-siim.png" alt="Municipalidad San Ramón" class="h-14 w-auto" />
                     <div>
                         <p class="font-serif font-bold text-brand-canopy leading-tight">SIIM</p>
                         <p class="text-[10px] text-ink-soft uppercase tracking-wider">Imagen Municipal</p>

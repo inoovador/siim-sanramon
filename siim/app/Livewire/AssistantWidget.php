@@ -21,6 +21,8 @@ final class AssistantWidget extends Component
 
     public ?string $errorMessage = null;
 
+    public ?string $pendingMessage = null;
+
     /** @var list<array{role:string, content:string, at:string}> */
     public array $history = [];
 
@@ -43,7 +45,11 @@ final class AssistantWidget extends Component
         $this->isOpen = ! $this->isOpen;
     }
 
-    public function send(AssistantChatUseCase $useCase): void
+    /**
+     * First roundtrip: append user message immediately + clear input.
+     * Triggers JS event that fires fetchReply on second roundtrip.
+     */
+    public function send(): void
     {
         $this->errorMessage = null;
         $this->validate();
@@ -60,17 +66,36 @@ final class AssistantWidget extends Component
         ];
         $this->input = '';
         $this->waiting = true;
+        $this->pendingMessage = $userText;
         $this->persistHistory();
+
+        $this->dispatch('assistant:fetch-reply');
+    }
+
+    /**
+     * Second roundtrip: do the slow LLM call and append assistant reply.
+     */
+    public function fetchReply(AssistantChatUseCase $useCase): void
+    {
+        if ($this->pendingMessage === null || $this->pendingMessage === '') {
+            $this->waiting = false;
+
+            return;
+        }
+
+        $userText = $this->pendingMessage;
+        $this->pendingMessage = null;
 
         try {
             $maxHistory = (int) config('llm.assistant.max_history_messages', 20);
-            $recent = array_slice($this->history, -$maxHistory);
+            $beforeUser = array_slice($this->history, 0, -1);
+            $context = array_slice($beforeUser, -$maxHistory);
 
             $reply = $useCase->handle(
                 systemPrompt: (string) config('llm.assistant.system_prompt'),
                 history: array_map(
                     fn (array $m): array => ['role' => $m['role'], 'content' => $m['content']],
-                    array_slice($recent, 0, -1)
+                    $context
                 ),
                 userMessage: $userText,
             );
@@ -97,6 +122,8 @@ final class AssistantWidget extends Component
             'at' => now()->format('H:i'),
         ]];
         $this->errorMessage = null;
+        $this->pendingMessage = null;
+        $this->waiting = false;
         $this->persistHistory();
     }
 
