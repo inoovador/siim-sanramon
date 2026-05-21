@@ -1,5 +1,5 @@
 <div
-    class="fixed bottom-6 right-6 z-50"
+    class="fixed bottom-6 right-6 z-30"
     x-data="{
         scrollBottom() { this.$nextTick(() => { const m = this.$refs.messages; if (m) m.scrollTop = m.scrollHeight; }); }
     }"
