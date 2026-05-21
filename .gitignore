@@ -1,0 +1,15 @@
+app/
+update/
+logo/
+*.docx
+*.pdf
+node_modules/
+vendor/
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
