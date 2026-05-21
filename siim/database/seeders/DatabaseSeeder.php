@@ -5,23 +5,32 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-
         $this->call(RolesAndPermissionsSeeder::class);
+
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@siim.local'],
+            [
+                'name' => 'Admin SIIM',
+                'password' => bcrypt('siim2026'),
+                'email_verified_at' => now(),
+            ]
+        );
+        $admin->syncRoles(['admin']);
+
+        $analyst = User::firstOrCreate(
+            ['email' => 'analyst@siim.local'],
+            [
+                'name' => 'Carlos Aguirre M.',
+                'password' => bcrypt('siim2026'),
+                'email_verified_at' => now(),
+            ]
+        );
+        $analyst->syncRoles(['analyst']);
     }
 }
