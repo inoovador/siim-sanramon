@@ -7,6 +7,8 @@ siim/.env
 siim/.env.*
 siim/vendor
 siim/node_modules
+siim/storage
+siim/bootstrap/cache
 siim/tests
 siim/docs
 siim/.deptrac.cache

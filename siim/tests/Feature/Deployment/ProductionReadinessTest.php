@@ -50,6 +50,18 @@ final class ProductionReadinessTest extends TestCase
         self::assertStringContainsString('npm ci', $dockerfile);
         self::assertStringContainsString('npm run build', $dockerfile);
         self::assertStringContainsString('33:33', $dockerfile);
+        self::assertStringContainsString('mkdir -p', $dockerfile);
+        foreach ([
+            'storage/app/public',
+            'storage/framework/cache/data',
+            'storage/framework/sessions',
+            'storage/framework/testing',
+            'storage/framework/views',
+            'storage/logs',
+            'bootstrap/cache',
+        ] as $writableDirectory) {
+            self::assertStringContainsString($writableDirectory, $dockerfile);
+        }
         self::assertStringNotContainsString('EXPOSE', $dockerfile);
     }
 
@@ -67,11 +79,13 @@ final class ProductionReadinessTest extends TestCase
         self::assertStringContainsString('CACHE_STORE=database', $environment);
         self::assertStringContainsString('SESSION_DRIVER=database', $environment);
         self::assertStringContainsString('QUEUE_CONNECTION=database', $environment);
-        foreach (['APP_KEY', 'DB_PASSWORD', 'MARIADB_PASSWORD', 'MARIADB_ROOT_PASSWORD', 'NVIDIA_API_KEY'] as $sensitiveKey) {
+        foreach (['APP_KEY', 'DB_PASSWORD', 'MARIADB_ROOT_PASSWORD', 'NVIDIA_API_KEY'] as $sensitiveKey) {
             self::assertArrayHasKey($sensitiveKey, $environmentValues);
             self::assertSame('', $environmentValues[$sensitiveKey]);
         }
 
+        self::assertArrayNotHasKey('MARIADB_PASSWORD', $environmentValues);
+        self::assertStringNotContainsString('${MARIADB_PASSWORD}', $this->fileContents('docker-compose.prod.yml'));
         self::assertStringContainsString('!.env.production.example', $this->fileContents('.gitignore'));
     }
 
@@ -79,7 +93,16 @@ final class ProductionReadinessTest extends TestCase
     {
         $rules = array_filter(array_map('trim', explode("\n", $this->fileContents('.dockerignore'))));
 
-        foreach (['.env', '.env.*', 'siim/.env', 'siim/.env.*', 'siim/vendor', 'siim/node_modules'] as $requiredRule) {
+        foreach ([
+            '.env',
+            '.env.*',
+            'siim/.env',
+            'siim/.env.*',
+            'siim/vendor',
+            'siim/node_modules',
+            'siim/storage',
+            'siim/bootstrap/cache',
+        ] as $requiredRule) {
             self::assertContains($requiredRule, $rules);
         }
     }

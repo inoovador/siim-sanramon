@@ -23,7 +23,16 @@ RUN composer install --no-dev --no-interaction --no-progress --optimize-autoload
 COPY --chown=33:33 siim ./
 COPY --from=frontend --chown=33:33 /app/public/build ./public/build
 
-RUN composer dump-autoload --no-dev --optimize --classmap-authoritative \
-    && chown -R 33:33 storage bootstrap/cache
+RUN mkdir -p \
+        storage/app/public \
+        storage/framework/cache/data \
+        storage/framework/sessions \
+        storage/framework/testing \
+        storage/framework/views \
+        storage/logs \
+        bootstrap/cache \
+    && composer dump-autoload --no-dev --optimize --classmap-authoritative \
+    && chown -R 33:33 storage bootstrap/cache \
+    && chmod -R ug+rwx storage bootstrap/cache
 
 USER www-data
