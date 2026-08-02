@@ -1,0 +1,29 @@
+FROM node:22-alpine AS frontend
+
+WORKDIR /app
+
+COPY siim/package.json siim/package-lock.json ./
+RUN npm ci
+
+COPY siim/resources ./resources
+COPY siim/public ./public
+COPY siim/vite.config.js ./
+COPY siim/tailwind.config.js ./
+COPY siim/postcss.config.js ./
+RUN npm run build
+
+FROM serversideup/php:8.3-fpm-nginx
+
+USER root
+WORKDIR /var/www/html
+
+COPY --chown=33:33 siim/composer.json siim/composer.lock ./
+RUN composer install --no-dev --no-interaction --no-progress --optimize-autoloader --no-scripts
+
+COPY --chown=33:33 siim ./
+COPY --from=frontend --chown=33:33 /app/public/build ./public/build
+
+RUN composer dump-autoload --no-dev --optimize --classmap-authoritative \
+    && chown -R 33:33 storage bootstrap/cache
+
+USER www-data

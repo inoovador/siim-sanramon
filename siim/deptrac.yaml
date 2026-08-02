@@ -26,6 +26,11 @@ deptrac:
         - type: classLike
           value: App\\Http\\.*
 
+    - name: SharedKernel
+      collectors:
+        - type: classLike
+          value: SIIM\\Application\\Shared\\.*
+
     - name: Context_Identity
       collectors:
         - type: classLike
@@ -57,18 +62,71 @@ deptrac:
           value: SIIM\\(Domain|Application)\\Reporting\\.*
 
   ruleset:
-    Domain: []
+    Domain:
+      - Domain
     Application:
+      - Application
       - Domain
+      - SharedKernel
+      - Context_Identity
+      - Context_Citizen
+      - Context_Ingestion
+      - Context_Analysis
+      - Context_Conversation
+      - Context_Reporting
     Infrastructure:
+      - Infrastructure
       - Application
       - Domain
+      - SharedKernel
+      - Context_Identity
+      - Context_Citizen
+      - Context_Ingestion
+      - Context_Analysis
+      - Context_Conversation
+      - Context_Reporting
     Http:
+      - Http
       - Application
+      - SharedKernel
+      - Context_Identity
+      - Context_Citizen
+      - Context_Ingestion
+      - Context_Analysis
+      - Context_Conversation
+      - Context_Reporting
+    SharedKernel:
+      - SharedKernel
+      - Application
+      - Domain
 
-    Context_Identity: []
-    Context_Citizen: []
-    Context_Ingestion: []
-    Context_Analysis: []
-    Context_Conversation: []
-    Context_Reporting: []
+    Context_Identity:
+      - Context_Identity
+      - Application
+      - Domain
+      - SharedKernel
+    Context_Citizen:
+      - Context_Citizen
+      - Application
+      - Domain
+      - SharedKernel
+    Context_Ingestion:
+      - Context_Ingestion
+      - Application
+      - Domain
+      - SharedKernel
+    Context_Analysis:
+      - Context_Analysis
+      - Application
+      - Domain
+      - SharedKernel
+    Context_Conversation:
+      - Context_Conversation
+      - Application
+      - Domain
+      - SharedKernel
+    Context_Reporting:
+      - Context_Reporting
+      - Application
+      - Domain
+      - SharedKernel
