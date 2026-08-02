@@ -52,6 +52,7 @@ final class ProductionReadinessTest extends TestCase
         self::assertStringContainsString('33:33', $dockerfile);
         self::assertStringContainsString('mkdir -p', $dockerfile);
         foreach ([
+            'storage/app/private',
             'storage/app/public',
             'storage/framework/cache/data',
             'storage/framework/sessions',

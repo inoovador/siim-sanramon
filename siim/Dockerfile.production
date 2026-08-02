@@ -24,6 +24,7 @@ COPY --chown=33:33 siim ./
 COPY --from=frontend --chown=33:33 /app/public/build ./public/build
 
 RUN mkdir -p \
+        storage/app/private \
         storage/app/public \
         storage/framework/cache/data \
         storage/framework/sessions \
