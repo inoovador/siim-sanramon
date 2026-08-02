@@ -5,6 +5,7 @@
 *.pdf
 node_modules/
 vendor/
+siim/.deptrac.cache
 .env
 .env.*
 !.env.example
