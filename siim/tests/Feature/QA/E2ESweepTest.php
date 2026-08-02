@@ -6,11 +6,14 @@ namespace Tests\Feature\QA;
 
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use SIIM\Application\Shared\Contracts\AssistantProvider;
 use Tests\TestCase;
 
 final class E2ESweepTest extends TestCase
 {
+    use RefreshDatabase;
+
     private User $admin;
 
     protected function setUp(): void
@@ -59,7 +62,7 @@ final class E2ESweepTest extends TestCase
         }
     }
 
-    public function test_nvidia_assistant_responds_to_three_distinct_questions_within_five_seconds(): void
+    public function test_nvidia_assistant_responds_to_three_distinct_questions_within_eight_seconds(): void
     {
         $apiKey = config('llm.providers.nvidia_glm.api_key');
 

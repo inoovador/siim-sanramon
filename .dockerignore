@@ -1,0 +1,17 @@
+.git
+.github
+.superpowers
+.env
+.env.*
+siim/.env
+siim/.env.*
+siim/vendor
+siim/node_modules
+siim/tests
+siim/docs
+siim/.deptrac.cache
+siim/docker-compose.yml
+siim/Dockerfile
+siim/phpunit.xml
+siim/phpstan.neon
+siim/phpstan-baseline.neon

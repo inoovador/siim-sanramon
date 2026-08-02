@@ -56,6 +56,7 @@ final class ProductionReadinessTest extends TestCase
     public function test_production_environment_example_contains_no_literal_secret_values(): void
     {
         $environment = $this->fileContents('.env.production.example');
+        $environmentValues = $this->environmentValues($environment);
 
         self::assertStringContainsString('APP_ENV=production', $environment);
         self::assertStringContainsString('APP_DEBUG=false', $environment);
@@ -66,8 +67,30 @@ final class ProductionReadinessTest extends TestCase
         self::assertStringContainsString('CACHE_STORE=database', $environment);
         self::assertStringContainsString('SESSION_DRIVER=database', $environment);
         self::assertStringContainsString('QUEUE_CONNECTION=database', $environment);
-        self::assertMatchesRegularExpression('/^(?:APP_KEY|DB_PASSWORD|MARIADB_ROOT_PASSWORD|NVIDIA_API_KEY)=$/m', $environment);
+        foreach (['APP_KEY', 'DB_PASSWORD', 'MARIADB_PASSWORD', 'MARIADB_ROOT_PASSWORD', 'NVIDIA_API_KEY'] as $sensitiveKey) {
+            self::assertArrayHasKey($sensitiveKey, $environmentValues);
+            self::assertSame('', $environmentValues[$sensitiveKey]);
+        }
+
         self::assertStringContainsString('!.env.production.example', $this->fileContents('.gitignore'));
+    }
+
+    public function test_docker_build_context_excludes_secrets_and_local_dependencies(): void
+    {
+        $rules = array_filter(array_map('trim', explode("\n", $this->fileContents('.dockerignore'))));
+
+        foreach (['.env', '.env.*', 'siim/.env', 'siim/.env.*', 'siim/vendor', 'siim/node_modules'] as $requiredRule) {
+            self::assertContains($requiredRule, $rules);
+        }
+    }
+
+    public function test_e2e_sweep_preserves_database_isolation_and_eight_second_latency_contract(): void
+    {
+        $e2eSweep = $this->fileContents('siim/tests/Feature/QA/E2ESweepTest.php');
+
+        self::assertStringContainsString('use Illuminate\\Foundation\\Testing\\RefreshDatabase;', $e2eSweep);
+        self::assertStringContainsString('use RefreshDatabase;', $e2eSweep);
+        self::assertStringContainsString('within_eight_seconds', $e2eSweep);
     }
 
     public function test_forwarded_https_is_trusted_behind_the_proxy(): void
@@ -133,5 +156,24 @@ final class ProductionReadinessTest extends TestCase
         }
 
         return $contents;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function environmentValues(string $environment): array
+    {
+        $values = [];
+
+        foreach (preg_split('/\R/', $environment) ?: [] as $line) {
+            if ($line === '' || str_starts_with($line, '#') || ! str_contains($line, '=')) {
+                continue;
+            }
+
+            [$key, $value] = explode('=', $line, 2);
+            $values[$key] = $value;
+        }
+
+        return $values;
     }
 }
