@@ -27,7 +27,7 @@ return new class extends Migration
             $table->timestamp('submitted_at');
             $table->date('response_date');
             $table->timestamps();
-            $table->unique(['survey_id', 'ip_hash', 'response_date']);
+            $table->unique(['survey_id', 'ip_hash', 'response_date'], 'survey_responses_dedupe_unique');
             $table->index(['survey_id', 'submitted_at']);
         });
 

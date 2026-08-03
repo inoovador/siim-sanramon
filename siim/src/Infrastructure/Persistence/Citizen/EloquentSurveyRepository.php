@@ -18,6 +18,13 @@ use UnexpectedValueException;
 
 final class EloquentSurveyRepository implements SurveyRepository
 {
+    public function findBySlug(string $slug): ?Survey
+    {
+        $model = SurveyModel::query()->where('slug', $slug)->with('questions')->first();
+
+        return $model === null ? null : $this->toDomain($model);
+    }
+
     public function findPublishedBySlug(string $slug): ?Survey
     {
         $model = SurveyModel::query()
