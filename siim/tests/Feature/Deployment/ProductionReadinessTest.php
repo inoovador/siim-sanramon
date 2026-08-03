@@ -105,6 +105,21 @@ final class ProductionReadinessTest extends TestCase
         self::assertStringNotContainsString('EXPOSE', $dockerfile);
     }
 
+    public function test_production_image_keeps_immutable_code_root_owned_and_runtime_paths_writable(): void
+    {
+        $dockerfile = $this->fileContents('siim/Dockerfile.production');
+
+        self::assertStringContainsString('chown -R root:root /var/www/html', $dockerfile);
+        self::assertStringContainsString('chmod -R a=rX /var/www/html', $dockerfile);
+        self::assertStringContainsString('chmod 0755 /var/www/html', $dockerfile);
+
+        $immutablePermissions = strpos($dockerfile, 'chmod -R a=rX /var/www/html');
+        $runtimeOwnership = strpos($dockerfile, 'chown -R 33:33 storage bootstrap/cache');
+        self::assertIsInt($immutablePermissions);
+        self::assertIsInt($runtimeOwnership);
+        self::assertLessThan($runtimeOwnership, $immutablePermissions);
+    }
+
     public function test_production_environment_example_contains_no_literal_secret_values(): void
     {
         $environment = $this->fileContents('.env.production.example');
