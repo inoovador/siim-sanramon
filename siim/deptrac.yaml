@@ -8,8 +8,13 @@ deptrac:
   layers:
     - name: Domain
       collectors:
-        - type: classLike
-          value: SIIM\\Domain\\.*
+        - type: bool
+          must:
+            - type: classLike
+              value: SIIM\\Domain\\.*
+          must_not:
+            - type: classLike
+              value: SIIM\\Domain\\(Identity|Citizen|Ingestion|Analysis|Conversation|Reporting)\\.*
 
     - name: Application
       collectors:

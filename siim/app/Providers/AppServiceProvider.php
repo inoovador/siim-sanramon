@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use SIIM\Application\Citizen\Contracts\SurveyRepository;
 use SIIM\Application\Identity\UseCases\DefaultRoleAssigner;
 use SIIM\Application\Shared\Contracts\AssistantProvider;
 use SIIM\Infrastructure\Identity\SpatieDefaultRoleAssigner;
 use SIIM\Infrastructure\Llm\NvidiaGlmAssistant;
+use SIIM\Infrastructure\Persistence\Citizen\EloquentSurveyRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(SurveyRepository::class, EloquentSurveyRepository::class);
+
         $this->app->bind(
             DefaultRoleAssigner::class,
             SpatieDefaultRoleAssigner::class,

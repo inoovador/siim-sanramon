@@ -38,6 +38,11 @@ class DatabaseSeeder extends Seeder
             password: $analystPassword,
             role: 'analyst',
         );
+
+        $this->call([
+            TopicSeeder::class,
+            SurveySeeder::class,
+        ]);
     }
 
     private function bootstrapPassword(string $configKey, string $environmentKey): string
