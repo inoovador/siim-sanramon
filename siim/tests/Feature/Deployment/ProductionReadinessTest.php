@@ -41,6 +41,19 @@ final class ProductionReadinessTest extends TestCase
         self::assertSame(2, substr_count($compose, 'image: siim:production'));
     }
 
+    public function test_production_worker_disables_the_inherited_web_healthcheck(): void
+    {
+        $compose = $this->fileContents('docker-compose.prod.yml');
+        preg_match('/^  siim-worker:\R(?<body>[\s\S]*?)(?=^[^\s]|\z)/m', $compose, $matches);
+
+        $workerBlock = $matches['body'] ?? null;
+        self::assertIsString($workerBlock);
+        self::assertStringContainsString(
+            '    healthcheck: { disable: true }',
+            $workerBlock,
+        );
+    }
+
     public function test_production_image_builds_assets_with_the_supported_php_runtime(): void
     {
         $dockerfile = $this->fileContents('siim/Dockerfile.production');

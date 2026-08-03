@@ -82,6 +82,7 @@ services:
     image: siim:production
     container_name: siim-worker
     restart: unless-stopped
+    healthcheck: { disable: true }
     command: php artisan queue:work --queue=analysis,default --tries=3 --timeout=90 --sleep=3 --max-time=3600
     environment:
       APP_NAME: ${APP_NAME}
