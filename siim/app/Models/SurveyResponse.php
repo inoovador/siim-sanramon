@@ -10,7 +10,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property string $id
+ * @property string $survey_id
+ * @property string|null $comment_id
+ * @property string|null $respondent_contact
+ */
 class SurveyResponse extends Model
 {
     /** @use HasFactory<SurveyResponseFactory> */
@@ -49,5 +56,11 @@ class SurveyResponse extends Model
     public function answers(): HasMany
     {
         return $this->hasMany(SurveyAnswer::class, 'response_id');
+    }
+
+    /** @return HasOne<SurveyAttempt, $this> */
+    public function attempt(): HasOne
+    {
+        return $this->hasOne(SurveyAttempt::class, 'response_id');
     }
 }

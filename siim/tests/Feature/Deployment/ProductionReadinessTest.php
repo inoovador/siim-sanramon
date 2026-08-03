@@ -138,6 +138,11 @@ final class ProductionReadinessTest extends TestCase
         self::assertStringContainsString('CACHE_STORE=database', $environment);
         self::assertStringContainsString('SESSION_DRIVER=database', $environment);
         self::assertStringContainsString('QUEUE_CONNECTION=database', $environment);
+        self::assertStringContainsString('SURVEY_PUBLIC_SLUG=', $environment);
+        self::assertSame(1, substr_count(
+            $this->serviceBlock($this->fileContents('docker-compose.prod.yml'), 'siim-prod'),
+            'SURVEY_PUBLIC_SLUG: ${SURVEY_PUBLIC_SLUG:?SURVEY_PUBLIC_SLUG must reference a published survey}',
+        ));
         foreach ([
             'APP_KEY',
             'DB_PASSWORD',

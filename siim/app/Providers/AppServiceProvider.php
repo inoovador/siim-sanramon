@@ -18,7 +18,10 @@ use SIIM\Application\Citizen\Contracts\CitizenEventPublisher;
 use SIIM\Application\Citizen\Contracts\CitizenSubmissionRepository;
 use SIIM\Application\Citizen\Contracts\CitizenTransaction;
 use SIIM\Application\Citizen\Contracts\ContactEncryptor;
+use SIIM\Application\Citizen\Contracts\SurveyAttemptRepository;
+use SIIM\Application\Citizen\Contracts\SurveyContactAccessRepository;
 use SIIM\Application\Citizen\Contracts\SurveyRepository;
+use SIIM\Application\Citizen\Queries\SurveyResultsQuery;
 use SIIM\Application\Citizen\UseCases\SubmitSurveyResponseUseCase;
 use SIIM\Application\Identity\UseCases\DefaultRoleAssigner;
 use SIIM\Application\Shared\Contracts\AssistantProvider;
@@ -32,8 +35,12 @@ use SIIM\Infrastructure\Llm\NvidiaSentimentAnalyzer;
 use SIIM\Infrastructure\Persistence\Analysis\EloquentAnalysisRepository;
 use SIIM\Infrastructure\Persistence\Citizen\EloquentCitizenSubmissionRepository;
 use SIIM\Infrastructure\Persistence\Citizen\EloquentCitizenTransaction;
+use SIIM\Infrastructure\Persistence\Citizen\EloquentSurveyAttemptRepository;
+use SIIM\Infrastructure\Persistence\Citizen\EloquentSurveyContactAccessRepository;
 use SIIM\Infrastructure\Persistence\Citizen\EloquentSurveyRepository;
+use SIIM\Infrastructure\Persistence\Citizen\EloquentSurveyResultsQuery;
 use SIIM\Infrastructure\Security\GcmContactEncryptor;
+use SIIM\Infrastructure\Security\SurveySubmissionRateLimitKey;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -43,6 +50,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(SurveyRepository::class, EloquentSurveyRepository::class);
+        $this->app->bind(SurveyAttemptRepository::class, EloquentSurveyAttemptRepository::class);
+        $this->app->bind(SurveyContactAccessRepository::class, EloquentSurveyContactAccessRepository::class);
+        $this->app->bind(SurveyResultsQuery::class, EloquentSurveyResultsQuery::class);
         $this->app->bind(CitizenSubmissionRepository::class, EloquentCitizenSubmissionRepository::class);
         $this->app->bind(CitizenTransaction::class, EloquentCitizenTransaction::class);
         $this->app->bind(CitizenEventPublisher::class, LaravelCitizenEventPublisher::class);
@@ -51,6 +61,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PrimarySentimentAnalyzer::class, fn ($app): NvidiaSentimentAnalyzer => $this->nvidiaSentiment($app));
         $this->app->bind(FallbackSentimentAnalyzer::class, LexiconSentimentAnalyzer::class);
         $this->app->singleton(ContactEncryptor::class, fn ($app): GcmContactEncryptor => new GcmContactEncryptor((string) $app['config']->get('app.key')));
+        $this->app->singleton(SurveySubmissionRateLimitKey::class, fn ($app): SurveySubmissionRateLimitKey => new SurveySubmissionRateLimitKey((string) $app['config']->get('app.key')));
         $this->app->when(SubmitSurveyResponseUseCase::class)
             ->needs('$appKey')->giveConfig('app.key');
         $this->app->when(AnalyzeCommentUseCase::class)

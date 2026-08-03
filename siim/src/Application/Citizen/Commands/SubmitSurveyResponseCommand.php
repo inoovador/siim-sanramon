@@ -16,5 +16,6 @@ final readonly class SubmitSurveyResponseCommand
         public ?string $userAgent,
         public ?int $completionMs,
         public DateTimeImmutable $submittedAt,
+        public ?string $attemptId = null,
     ) {}
 }

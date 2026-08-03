@@ -12,6 +12,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use SIIM\Domain\Citizen\QuestionType;
 
+/**
+ * @property string $id
+ * @property int $position
+ * @property QuestionType $type
+ * @property string $label
+ * @property bool $is_required
+ * @property list<string|array{value: int|string, label?: string}>|null $options
+ * @property int|null $max_selections
+ * @property int|null $max_length
+ */
 class SurveyQuestion extends Model
 {
     /** @use HasFactory<SurveyQuestionFactory> */

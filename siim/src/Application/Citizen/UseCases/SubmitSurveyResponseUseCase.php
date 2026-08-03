@@ -10,6 +10,7 @@ use SIIM\Application\Citizen\Contracts\CitizenEventPublisher;
 use SIIM\Application\Citizen\Contracts\CitizenSubmissionRepository;
 use SIIM\Application\Citizen\Contracts\CitizenTransaction;
 use SIIM\Application\Citizen\Contracts\ContactEncryptor;
+use SIIM\Application\Citizen\Contracts\SurveyAttemptRepository;
 use SIIM\Application\Citizen\Contracts\SurveyRepository;
 use SIIM\Application\Citizen\Data\CommentDraft;
 use SIIM\Application\Citizen\Data\SurveySubmission;
@@ -28,6 +29,7 @@ final readonly class SubmitSurveyResponseUseCase
         private CitizenTransaction $transaction,
         private ContactEncryptor $contacts,
         private CitizenEventPublisher $events,
+        private SurveyAttemptRepository $attempts,
         private string $appKey,
     ) {}
 
@@ -71,6 +73,10 @@ final readonly class SubmitSurveyResponseUseCase
             }
 
             $this->submissions->save(new SurveySubmission($response, $contactQuestionId, $comment));
+
+            if ($command->attemptId !== null && ! $this->attempts->complete($command->attemptId, $survey->id, $response->id, $command->submittedAt)) {
+                throw new InvalidArgumentException('Survey attempt was not found or has already been completed.');
+            }
         });
 
         if ($comment !== null) {

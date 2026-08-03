@@ -11,10 +11,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="font-sans antialiased text-ink-deep bg-brand-mist">
-    <div class="min-h-screen flex">
+<body class="font-sans antialiased text-ink-deep bg-brand-mist overflow-x-hidden">
+    <div class="min-h-screen flex" x-data="{ sidebarOpen: false }" @keydown.escape.window="sidebarOpen = false">
+        <button type="button" x-show="sidebarOpen" x-transition.opacity @click="sidebarOpen = false" class="fixed inset-0 z-30 bg-ink-deep/40 lg:hidden" aria-label="Cerrar menú lateral"></button>
         {{-- Sidebar --}}
-        <aside class="w-64 bg-white border-r border-brand-canopy/10 flex flex-col flex-shrink-0">
+        <aside class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col border-r border-brand-canopy/10 bg-white transition-transform duration-200 lg:static lg:translate-x-0"
+               :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
             <div class="h-20 flex items-center gap-3 px-5 border-b border-brand-canopy/10">
                 <img src="/images/logo-siim.png" alt="Municipalidad San Ramón" class="h-12 w-auto flex-shrink-0" />
                 <div class="min-w-0">
@@ -26,6 +28,11 @@
             <nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
                 <p class="px-4 text-[10px] uppercase tracking-widest text-ink-soft font-semibold mb-2">Análisis</p>
                 <x-sidebar-link href="/panel" icon="dashboard">Dashboard</x-sidebar-link>
+                @auth
+                    @if(auth()->user()->hasAnyRole(['admin', 'analyst']))
+                        <x-sidebar-link href="/panel/encuestas" icon="clipboard">Encuestas</x-sidebar-link>
+                    @endif
+                @endauth
                 <x-sidebar-link href="/panel/comentarios" icon="message-square">Comentarios</x-sidebar-link>
                 <x-sidebar-link href="/panel/temas" icon="brain">Temas</x-sidebar-link>
                 <x-sidebar-link href="/panel/chat-rag" icon="brain">Chat RAG</x-sidebar-link>
@@ -60,8 +67,11 @@
         {{-- Main column --}}
         <div class="flex-1 flex flex-col min-w-0">
             {{-- Topbar --}}
-            <header class="h-16 bg-white border-b border-brand-canopy/10 flex items-center justify-between px-6 flex-shrink-0">
+            <header class="h-16 bg-white border-b border-brand-canopy/10 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
                 <div class="flex items-center gap-2 text-sm">
+                    <button type="button" @click="sidebarOpen = true" class="mr-1 rounded-lg p-2 text-brand-canopy hover:bg-brand-canopy/5 focus:outline-none focus:ring-2 focus:ring-brand-gold lg:hidden" aria-label="Abrir menú lateral">
+                        <x-icon name="menu" class="h-5 w-5" />
+                    </button>
                     @if(count($breadcrumb))
                         @foreach($breadcrumb as $idx => $crumb)
                             @if($idx > 0)
@@ -75,7 +85,7 @@
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <div class="relative">
+                    <div class="relative hidden xl:block">
                         <input type="search" placeholder="Buscar..." class="w-64 pl-9 pr-3 py-2 text-sm rounded-lg border border-brand-canopy/10 focus:border-brand-canopy focus:ring-1 focus:ring-brand-canopy/20 bg-brand-mist/50" />
                         <x-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft" />
                     </div>
@@ -85,7 +95,7 @@
                             <div class="w-9 h-9 rounded-full bg-brand-canopy/10 text-brand-canopy flex items-center justify-center font-serif font-bold text-sm">
                                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                             </div>
-                            <div class="text-right">
+                            <div class="hidden text-right sm:block">
                                 <p class="text-sm font-medium leading-none">{{ auth()->user()->name }}</p>
                                 <p class="text-xs text-ink-soft mt-0.5">{{ auth()->user()->roles->first()?->name ?? 'sin rol' }}</p>
                             </div>
@@ -95,7 +105,7 @@
             </header>
 
             {{-- Page content --}}
-            <main class="flex-1 overflow-y-auto p-8">
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
                 @if($title)
                     <div class="mb-6">
                         <h1 class="text-2xl font-serif font-bold text-brand-canopy">{{ $title }}</h1>

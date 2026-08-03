@@ -13,7 +13,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use SIIM\Domain\Citizen\SurveyStatus;
 
-/** @property-read Collection<int, SurveyQuestion> $questions */
+/**
+ * @property string $id
+ * @property string $slug
+ * @property string $title
+ * @property SurveyStatus $status
+ * @property-read Collection<int, SurveyQuestion> $questions
+ */
 class Survey extends Model
 {
     /** @use HasFactory<SurveyFactory> */
@@ -46,6 +52,12 @@ class Survey extends Model
     public function responses(): HasMany
     {
         return $this->hasMany(SurveyResponse::class);
+    }
+
+    /** @return HasMany<SurveyAttempt, $this> */
+    public function attempts(): HasMany
+    {
+        return $this->hasMany(SurveyAttempt::class);
     }
 
     /** @return BelongsTo<User, $this> */

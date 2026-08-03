@@ -2,6 +2,7 @@
 
 use function Livewire\Volt\state;
 use function Livewire\Volt\title;
+use SIIM\Application\Citizen\Queries\SurveyResultsQuery;
 
 title('Dashboard · SIIM');
 
@@ -10,8 +11,25 @@ state([
         ['label' => 'Comentarios totales', 'value' => '1,247', 'delta' => '+12%', 'positive' => true, 'icon' => 'message-square'],
         ['label' => 'Sentimiento positivo', 'value' => '64%', 'delta' => '+4 pts', 'positive' => true, 'icon' => 'brain'],
         ['label' => 'Comentarios hoy', 'value' => '23', 'delta' => '-5%', 'positive' => false, 'icon' => 'bar-chart'],
-        ['label' => 'Tema trending', 'value' => 'Obras públicas', 'delta' => '38 menciones', 'positive' => true, 'icon' => 'database'],
     ],
+    'activeSurvey' => function () {
+        $user = auth()->user();
+        if ($user === null || ! $user->hasAnyRole(['admin', 'analyst'])) {
+            return null;
+        }
+
+        $survey = app(SurveyResultsQuery::class)->activeSurvey(now()->toDateTimeImmutable());
+        if ($survey === null) {
+            return null;
+        }
+
+        return [
+            'slug' => $survey->slug,
+            'title' => $survey->title,
+            'response_count' => $survey->responseCount,
+            'last_response' => $survey->lastResponseAt?->format('d/m/Y H:i'),
+        ];
+    },
     'channelData' => fn () => [
         ['label' => 'Facebook', 'value' => 487, 'color' => '#1E7FA8'],
         ['label' => 'Instagram', 'value' => 312, 'color' => '#E0A24A'],
@@ -69,6 +87,29 @@ state([
                 </p>
             </div>
         @endforeach
+        @if(auth()->user()?->hasAnyRole(['admin', 'analyst']))
+            <div class="card">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <p class="text-xs uppercase tracking-wider text-ink-soft font-semibold">Encuesta activa</p>
+                        @if($activeSurvey)
+                            <p class="mt-2 truncate font-serif text-lg font-bold text-brand-canopy">{{ $activeSurvey['title'] }}</p>
+                        @else
+                            <p class="mt-2 font-serif text-lg font-bold text-brand-canopy">Sin encuesta activa</p>
+                        @endif
+                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-brand-gold/20 text-brand-canopy flex items-center justify-center flex-shrink-0">
+                        <x-icon name="clipboard" class="w-5 h-5" />
+                    </div>
+                </div>
+                @if($activeSurvey)
+                    <p class="mt-3 text-xs text-ink-soft">{{ $activeSurvey['response_count'] }} {{ $activeSurvey['response_count'] === 1 ? 'respuesta' : 'respuestas' }} · Última: {{ $activeSurvey['last_response'] ?? 'sin respuestas' }}</p>
+                    <a href="{{ route('panel.surveys.results', ['slug' => $activeSurvey['slug']]) }}" class="mt-2 inline-flex text-xs font-semibold text-brand-river underline">Ver resultados</a>
+                @else
+                    <a href="{{ route('panel.surveys') }}" class="mt-3 inline-flex text-xs font-semibold text-brand-river underline">Ver encuestas</a>
+                @endif
+            </div>
+        @endif
     </div>
 
     {{-- Charts grid --}}

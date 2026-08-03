@@ -17,7 +17,8 @@
             Plataforma de análisis de percepción ciudadana con IA y NLP.
             <br/>Versión <code class="text-brand-river">0.1.0-F0</code> — Scaffold inicial.
         </p>
-        <div class="mt-8 flex gap-3 justify-center">
+        <div class="mt-8 flex flex-col flex-wrap justify-center gap-3 sm:flex-row">
+            <a href="{{ route('survey.show') }}" class="btn-primary">Participar en la encuesta</a>
             <a href="/health" class="btn-primary">Health check</a>
             <a href="/login" class="px-4 py-2 rounded-lg border border-brand-canopy text-brand-canopy hover:bg-brand-canopy/5">Acceso funcionarios</a>
         </div>
