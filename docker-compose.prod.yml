@@ -58,6 +58,7 @@ services:
       - traefik.http.services.siim.loadbalancer.server.port=8080
     networks:
       - coolify
+      - siim-backend
 
   siim-db:
     image: mariadb:11.4
@@ -76,7 +77,7 @@ services:
     volumes:
       - siim-db-data:/var/lib/mysql
     networks:
-      - coolify
+      - siim-backend
 
   siim-worker:
     image: siim:production
@@ -116,12 +117,16 @@ services:
       siim-db:
         condition: service_healthy
     networks:
-      - coolify
+      - siim-backend
 
 volumes:
   siim-db-data:
 
 networks:
+  siim-backend:
+    name: siim-backend
+    driver: bridge
+    internal: false
   coolify:
     external: true
     name: coolify

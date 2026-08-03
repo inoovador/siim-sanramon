@@ -24,6 +24,24 @@ final class ProductionReadinessTest extends TestCase
         self::assertStringNotContainsString('MARIADB_ROOT_PASSWORD: secret', $compose);
     }
 
+    public function test_production_compose_isolates_database_and_worker_on_an_egress_enabled_backend(): void
+    {
+        $compose = $this->fileContents('docker-compose.prod.yml');
+        $application = $this->serviceBlock($compose, 'siim-prod');
+        $database = $this->serviceBlock($compose, 'siim-db');
+        $worker = $this->serviceBlock($compose, 'siim-worker');
+
+        self::assertStringContainsString("    networks:\n      - coolify\n      - siim-backend", $application);
+        self::assertStringContainsString("    networks:\n      - siim-backend", $database);
+        self::assertStringNotContainsString('      - coolify', $database);
+        self::assertStringContainsString("    networks:\n      - siim-backend", $worker);
+        self::assertStringNotContainsString('      - coolify', $worker);
+        self::assertStringContainsString(
+            "  siim-backend:\n    name: siim-backend\n    driver: bridge\n    internal: false",
+            $compose,
+        );
+    }
+
     public function test_production_compose_routes_only_the_application_through_traefik(): void
     {
         $compose = $this->fileContents('docker-compose.prod.yml');
@@ -64,6 +82,14 @@ final class ProductionReadinessTest extends TestCase
         self::assertStringContainsString('npm run build', $dockerfile);
         self::assertStringContainsString('33:33', $dockerfile);
         self::assertStringContainsString('mkdir -p', $dockerfile);
+        self::assertStringContainsString('COPY --chown=root:root siim/composer.json siim/composer.lock ./', $dockerfile);
+        self::assertStringContainsString('COPY --chown=root:root siim ./', $dockerfile);
+        self::assertStringContainsString(
+            'COPY --from=frontend --chown=root:root /app/public/build ./public/build',
+            $dockerfile,
+        );
+        self::assertStringNotContainsString('COPY --chown=33:33', $dockerfile);
+        self::assertStringNotContainsString('COPY --from=frontend --chown=33:33', $dockerfile);
         foreach ([
             'storage/app/private',
             'storage/app/public',
@@ -93,7 +119,14 @@ final class ProductionReadinessTest extends TestCase
         self::assertStringContainsString('CACHE_STORE=database', $environment);
         self::assertStringContainsString('SESSION_DRIVER=database', $environment);
         self::assertStringContainsString('QUEUE_CONNECTION=database', $environment);
-        foreach (['APP_KEY', 'DB_PASSWORD', 'MARIADB_ROOT_PASSWORD', 'NVIDIA_API_KEY'] as $sensitiveKey) {
+        foreach ([
+            'APP_KEY',
+            'DB_PASSWORD',
+            'MARIADB_ROOT_PASSWORD',
+            'NVIDIA_API_KEY',
+            'SIIM_ADMIN_PASSWORD',
+            'SIIM_ANALYST_PASSWORD',
+        ] as $sensitiveKey) {
             self::assertArrayHasKey($sensitiveKey, $environmentValues);
             self::assertSame('', $environmentValues[$sensitiveKey]);
         }
@@ -101,6 +134,30 @@ final class ProductionReadinessTest extends TestCase
         self::assertArrayNotHasKey('MARIADB_PASSWORD', $environmentValues);
         self::assertStringNotContainsString('${MARIADB_PASSWORD}', $this->fileContents('docker-compose.prod.yml'));
         self::assertStringContainsString('!.env.production.example', $this->fileContents('.gitignore'));
+    }
+
+    public function test_production_bootstrap_credentials_are_transient_and_have_no_tracked_default(): void
+    {
+        $compose = $this->fileContents('docker-compose.prod.yml');
+        $seeder = $this->fileContents('siim/database/seeders/DatabaseSeeder.php');
+
+        self::assertStringNotContainsString('SIIM_ADMIN_PASSWORD', $compose);
+        self::assertStringNotContainsString('SIIM_ANALYST_PASSWORD', $compose);
+        self::assertStringNotContainsString('siim' . '2026', $seeder);
+        self::assertStringNotContainsString('firstOrCreate(', $seeder);
+        self::assertStringContainsString('Hash::check(', $seeder);
+        self::assertStringContainsString('SIIM_ADMIN_PASSWORD', $seeder);
+        self::assertStringContainsString('SIIM_ANALYST_PASSWORD', $seeder);
+    }
+
+    public function test_production_bootstrap_config_reads_credentials_from_environment_without_defaults(): void
+    {
+        $configurationPath = dirname(base_path()) . '/siim/config/siim.php';
+
+        self::assertFileExists($configurationPath);
+        $configuration = $this->fileContents('siim/config/siim.php');
+        self::assertStringContainsString("env('SIIM_ADMIN_PASSWORD')", $configuration);
+        self::assertStringContainsString("env('SIIM_ANALYST_PASSWORD')", $configuration);
     }
 
     public function test_docker_build_context_excludes_secrets_and_local_dependencies(): void
@@ -193,6 +250,21 @@ final class ProductionReadinessTest extends TestCase
         }
 
         return $contents;
+    }
+
+    private function serviceBlock(string $compose, string $service): string
+    {
+        $servicePattern = preg_quote($service, '/');
+        preg_match(
+            "/^  {$servicePattern}:\\R(?<body>[\\s\\S]*?)(?=^  [a-zA-Z0-9_-]+:\\R|^[^\\s]|\\z)/m",
+            $compose,
+            $matches,
+        );
+
+        $serviceBlock = $matches['body'] ?? null;
+        self::assertIsString($serviceBlock);
+
+        return $serviceBlock;
     }
 
     /**
