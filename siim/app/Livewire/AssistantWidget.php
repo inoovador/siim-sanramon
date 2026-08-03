@@ -105,8 +105,8 @@ final class AssistantWidget extends Component
                 'content' => $reply->content,
                 'at' => now()->format('H:i'),
             ];
-        } catch (Throwable $e) {
-            Log::error('Asistente SIIM falló', ['error' => $e->getMessage()]);
+        } catch (Throwable) {
+            Log::error('Assistant provider request failed.', ['category' => 'assistant_provider_failure']);
             $this->errorMessage = 'No pude responder en este momento. Intenta nuevamente.';
         } finally {
             $this->waiting = false;

@@ -14,5 +14,7 @@ interface AnalysisRepository
 
     public function todayCost(DateTimeImmutable $now): float;
 
+    public function isComplete(string $commentId): bool;
+
     public function persist(AnalysisPersistence $persistence): void;
 }

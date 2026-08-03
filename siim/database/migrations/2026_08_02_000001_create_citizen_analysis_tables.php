@@ -71,13 +71,24 @@ return new class extends Migration
             $table->foreign('comment_id')->references('id')->on('comments')->cascadeOnDelete();
             $table->string('llm_provider', 40);
             $table->string('llm_model', 80);
-            $table->enum('status', ['pending', 'success', 'failed', 'fallback']);
+            $table->enum('status', ['success', 'failed', 'fallback']);
+            $table->boolean('fallback_used')->default(false);
             $table->unsignedInteger('tokens_input')->nullable();
             $table->unsignedInteger('tokens_output')->nullable();
             $table->decimal('cost_usd', 10, 6)->default(0);
+            $table->enum('error_category', [
+                'not_configured',
+                'budget_exhausted',
+                'rate_limited',
+                'provider_unavailable',
+                'connection_failure',
+                'request_rejected',
+                'invalid_response',
+                'retries_exhausted',
+            ])->nullable();
             $table->string('error_message', 500)->nullable();
-            $table->timestamp('requested_at');
-            $table->timestamp('completed_at')->nullable();
+            $table->timestamp('requested_at')->useCurrent();
+            $table->timestamp('completed_at')->useCurrent();
             $table->index(['comment_id', 'requested_at']);
         });
     }

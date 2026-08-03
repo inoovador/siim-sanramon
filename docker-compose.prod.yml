@@ -25,6 +25,7 @@ services:
       DB_DATABASE: ${DB_DATABASE}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
+      DB_QUEUE_RETRY_AFTER: ${DB_QUEUE_RETRY_AFTER:-120}
       CACHE_STORE: ${CACHE_STORE}
       SESSION_DRIVER: ${SESSION_DRIVER}
       QUEUE_CONNECTION: ${QUEUE_CONNECTION}
@@ -84,7 +85,7 @@ services:
     container_name: siim-worker
     restart: unless-stopped
     healthcheck: { disable: true }
-    command: php artisan queue:work --queue=analysis,default --tries=3 --timeout=90 --sleep=3 --max-time=3600
+    command: php artisan queue:work --queue=analysis,default --tries=4 --timeout=90 --sleep=3 --max-time=3600
     environment:
       APP_NAME: ${APP_NAME}
       APP_ENV: ${APP_ENV}
@@ -103,6 +104,7 @@ services:
       DB_DATABASE: ${DB_DATABASE}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
+      DB_QUEUE_RETRY_AFTER: ${DB_QUEUE_RETRY_AFTER:-120}
       CACHE_STORE: ${CACHE_STORE}
       SESSION_DRIVER: ${SESSION_DRIVER}
       QUEUE_CONNECTION: ${QUEUE_CONNECTION}

@@ -9,13 +9,15 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use SIIM\Application\Analysis\Exceptions\RetryableSentimentAnalysisException;
 use SIIM\Application\Analysis\UseCases\AnalyzeCommentUseCase;
+use Throwable;
 
 final class AnalyzeCommentJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $tries = 3;
+    public int $tries = 4;
 
     public int $timeout = 90;
 
@@ -30,5 +32,12 @@ final class AnalyzeCommentJob implements ShouldQueue
     public function handle(AnalyzeCommentUseCase $useCase): void
     {
         $useCase->handle($this->commentId);
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        if ($exception instanceof RetryableSentimentAnalysisException) {
+            app(AnalyzeCommentUseCase::class)->markFailed($this->commentId);
+        }
     }
 }

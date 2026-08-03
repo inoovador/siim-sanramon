@@ -37,13 +37,6 @@ return [
         'daily_usd' => (float) env('LLM_DAILY_BUDGET_USD', 5.0),
     ],
 
-    'sentiment' => [
-        'timeout' => 20,
-        'max_tokens' => 180,
-        'retry_backoff_seconds' => [10, 60, 300],
-        'analysis_time_budget_seconds' => 75,
-    ],
-
     'assistant' => [
         'system_prompt' => <<<'PROMPT'
 Eres "Asistente SIIM" del Sistema Inteligente de Imagen Municipal (Municipalidad San Ramón, Perú). Guías a funcionarios de Imagen Institucional.

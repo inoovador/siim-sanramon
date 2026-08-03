@@ -10,10 +10,17 @@ final readonly class AnalysisPersistence
 {
     public function __construct(
         public AnalyzableComment $comment,
-        public SentimentAnalysis $sentiment,
+        public SentimentAnalysis $score,
+        public bool $updateScore,
+        public string $provider,
+        public string $model,
         public string $status,
+        public bool $fallbackUsed,
+        public ?AnalysisErrorCategory $errorCategory,
         public ?string $errorMessage,
         public DateTimeImmutable $requestedAt,
         public DateTimeImmutable $completedAt,
+        public TokenUsage $usage = new TokenUsage,
+        public float $costUsd = 0.0,
     ) {}
 }

@@ -19,8 +19,9 @@ class AnalysisRun extends Model
 
     /** @var list<string> */
     protected $fillable = [
-        'id', 'comment_id', 'llm_provider', 'llm_model', 'status', 'tokens_input',
-        'tokens_output', 'cost_usd', 'error_message', 'requested_at', 'completed_at',
+        'id', 'comment_id', 'llm_provider', 'llm_model', 'status', 'fallback_used',
+        'tokens_input', 'tokens_output', 'cost_usd', 'error_category', 'error_message',
+        'requested_at', 'completed_at',
     ];
 
     /** @return array<string, string> */
@@ -29,6 +30,7 @@ class AnalysisRun extends Model
         return [
             'tokens_input' => 'integer',
             'tokens_output' => 'integer',
+            'fallback_used' => 'boolean',
             'cost_usd' => 'decimal:6',
             'requested_at' => 'immutable_datetime',
             'completed_at' => 'immutable_datetime',

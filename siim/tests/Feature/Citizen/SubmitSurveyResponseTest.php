@@ -92,20 +92,27 @@ it('stores an encrypted transactional response and publishes its comment after s
 
     $result = app(SubmitSurveyResponseUseCase::class)->handle(submissionCommand($survey));
     $response = SurveyResponse::query()->findOrFail($result->responseId);
+    $comment = Comment::query()->findOrFail($response->comment_id);
     assert(is_string($response->respondent_contact));
+    $appKey = config('app.key');
+    assert(is_string($appKey));
 
-    expect(SurveyAnswer::query()->where('response_id', $response->id)->count())->toBe(12)
+    expect(SurveyResponse::query()->count())->toBe(1)
+        ->and(Comment::query()->count())->toBe(1)
+        ->and(SurveyAnswer::query()->where('response_id', $response->id)->count())->toBe(12)
         ->and($response->zone)->toBe('Centro')
         ->and($response->age_range)->toBe('18-25')
         ->and($response->ip_hash)->toBe(hash('sha256', '203.0.113.9' . config('app.key')))
-        ->and($response->user_agent_hash)->toBe(hash('sha256', 'Task 2 test agent'))
+        ->and($response->user_agent_hash)->toBe(hash_hmac('sha256', 'Task 2 test agent', $appKey))
         ->and($response->getRawOriginal('response_date'))->toBe('2026-08-02')
         ->and($response->respondent_contact)->not->toContain('ana@example.test')
         ->and(Crypt::decryptString($response->respondent_contact))->toBe('ana@example.test')
         ->and(app(ContactEncryptor::class)->cipher())->toBe('AES-256-GCM')
         ->and(SurveyAnswer::query()->where('response_id', $response->id)->where('question_id', submissionQuestion($survey, 12)->id)->value('value_text'))->toBe($response->respondent_contact)
-        ->and(Comment::query()->findOrFail($response->comment_id)->channel)->toBe(Channel::WebSurvey)
-        ->and(Comment::query()->findOrFail($response->comment_id)->source)->toBe("survey:{$survey->slug}:{$response->id}");
+        ->and($comment->channel)->toBe(Channel::WebSurvey)
+        ->and($comment->source)->toBe("survey:{$survey->slug}:{$response->id}")
+        ->and($comment->language)->toBe('es')
+        ->and($comment->getRawOriginal('captured_at'))->toBe('2026-08-02 10:00:00');
     expect(json_encode($response->getAttributes(), JSON_THROW_ON_ERROR))->not->toContain('203.0.113.9');
 
     Event::assertDispatchedTimes(CommentIngested::class, 1);

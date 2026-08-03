@@ -53,9 +53,13 @@ final class ProductionReadinessTest extends TestCase
         self::assertStringContainsString('traefik.http.services.siim.loadbalancer.server.port=8080', $compose);
         self::assertStringContainsString('traefik.docker.network=coolify', $compose);
         self::assertStringContainsString(
-            'php artisan queue:work --queue=analysis,default --tries=3 --timeout=90 --sleep=3 --max-time=3600',
+            'php artisan queue:work --queue=analysis,default --tries=4 --timeout=90 --sleep=3 --max-time=3600',
             $compose,
         );
+        self::assertSame(2, substr_count($compose, 'DB_QUEUE_RETRY_AFTER: ${DB_QUEUE_RETRY_AFTER:-120}'));
+        $retryAfter = config('queue.connections.database.retry_after');
+        self::assertIsInt($retryAfter);
+        self::assertGreaterThan(90, $retryAfter);
         self::assertSame(2, substr_count($compose, 'image: siim:production'));
     }
 

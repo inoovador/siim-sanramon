@@ -40,7 +40,7 @@ final readonly class SubmitSurveyResponseUseCase
 
         $answers = array_map(static fn (mixed $value, string $id): Answer => new Answer($id, $value), $command->answersByQuestionId, array_keys($command->answersByQuestionId));
         $ipHash = hash('sha256', $command->ipAddress . $this->appKey);
-        $userAgentHash = $command->userAgent === null ? null : hash('sha256', $command->userAgent);
+        $userAgentHash = $command->userAgent === null ? null : hash_hmac('sha256', $command->userAgent, $this->appKey);
         $contactQuestionId = $this->questionIdAtPosition($survey->questions, 12);
         $commentQuestionId = $this->questionIdAtPosition($survey->questions, 11);
         $rawContact = $contactQuestionId === null ? null : ($command->answersByQuestionId[$contactQuestionId] ?? null);

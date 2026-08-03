@@ -5,6 +5,8 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/framework/mariadb-*
+/storage/private
 /vendor
 .env
 .env.backup

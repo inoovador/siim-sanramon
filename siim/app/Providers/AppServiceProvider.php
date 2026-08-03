@@ -73,6 +73,7 @@ class AppServiceProvider extends ServiceProvider
                 timeout: (int) ($cfg['timeout'] ?? 30),
                 maxTokens: (int) ($cfg['max_tokens'] ?? 4096),
                 verifySsl: (bool) ($cfg['verify_ssl'] ?? true),
+                environment: $app->environment(),
             );
         });
     }
@@ -90,16 +91,12 @@ class AppServiceProvider extends ServiceProvider
         $cfg = $app->make(ConfigRepository::class)->get('llm.providers.nvidia_glm');
         $cfg = is_array($cfg) ? $cfg : [];
 
-        $sentiment = $app->make(ConfigRepository::class)->get('llm.sentiment');
-        $sentiment = is_array($sentiment) ? $sentiment : [];
-
         return new NvidiaSentimentAnalyzer(
-            (string) ($cfg['api_key'] ?? ''),
-            (string) ($cfg['base_url'] ?? ''),
-            (string) ($cfg['model'] ?? ''),
-            (int) ($sentiment['timeout'] ?? 20),
-            (bool) ($cfg['verify_ssl'] ?? true),
-            analysisTimeBudgetSeconds: (int) ($sentiment['analysis_time_budget_seconds'] ?? 75),
+            apiKey: (string) ($cfg['api_key'] ?? ''),
+            baseUrl: (string) ($cfg['base_url'] ?? ''),
+            model: (string) ($cfg['model'] ?? ''),
+            verifySsl: (bool) ($cfg['verify_ssl'] ?? true),
+            environment: $app->environment(),
         );
     }
 }
