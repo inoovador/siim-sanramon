@@ -15,11 +15,13 @@ Route::get('/health', HealthController::class)->name('health');
 
 Route::view('/', 'welcome');
 
+$publicSurveyThrottle = 'throttle:' . config('citizen.submission.route_throttle', '120,1');
+
 Volt::route('/encuesta', 'public.survey.show')
-    ->middleware('throttle:20,1')
+    ->middleware($publicSurveyThrottle)
     ->name('survey.show');
 Volt::route('/encuesta/gracias', 'public.survey.thanks')
-    ->middleware('throttle:20,1')
+    ->middleware($publicSurveyThrottle)
     ->name('survey.thanks');
 
 Route::middleware(['auth', 'verified'])->group(function () {

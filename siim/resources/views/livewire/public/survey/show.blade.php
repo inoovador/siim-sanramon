@@ -100,11 +100,13 @@ new #[Layout('components.layouts.public')] #[Title('Encuesta ciudadana · SIIM')
 
         $ipAddress = request()->ip() ?? 'unknown';
         $key = $rateLimitKey->forIp($ipAddress);
-        if (RateLimiter::tooManyAttempts($key, 5)) {
-            $tracking->discard($this->attemptId, (string) $this->survey['id']);
-            throw new SurveySubmissionRateLimitException();
+        $maxAttempts = (int) config('citizen.submission.max_attempts', 60);
+        if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
+            $this->formError = SurveySubmissionRateLimitException::MESSAGE;
+
+            return null;
         }
-        RateLimiter::hit($key, 60);
+        RateLimiter::hit($key, (int) config('citizen.submission.decay_seconds', 60));
 
         $submittedAt = now()->toDateTimeImmutable();
         $elapsedMilliseconds = $tracking->elapsedMilliseconds(
@@ -113,7 +115,8 @@ new #[Layout('components.layouts.public')] #[Title('Encuesta ciudadana · SIIM')
             $submittedAt,
         );
 
-        if (trim($this->website) !== '' || ($elapsedMilliseconds !== null && $elapsedMilliseconds < 5000)) {
+        $minCompletionMs = (int) round(((float) config('citizen.submission.min_completion_seconds', 2)) * 1000);
+        if (trim($this->website) !== '' || ($elapsedMilliseconds !== null && $elapsedMilliseconds < $minCompletionMs)) {
             $tracking->discard($this->attemptId, (string) $this->survey['id']);
             session()->flash('survey_confirmation_generic', true);
 
@@ -340,22 +343,25 @@ new #[Layout('components.layouts.public')] #[Title('Encuesta ciudadana · SIIM')
 
             @foreach ($survey['questions'] as $question)
                 @php($answerKey = 'answers.' . $question['id'])
-                <fieldset class="rounded-2xl border border-brand-canopy/10 bg-white p-5 shadow-brand sm:p-6" wire:key="question-{{ $question['id'] }}">
-                    <legend class="w-full px-1 text-base font-semibold leading-6 text-ink-deep">
-                        <span class="mr-2 text-brand-river">{{ $question['position'] }}.</span>{{ $question['label'] }}
-                        @if ($question['is_required'])
-                            <span class="ml-1 text-brand-clay" aria-label="obligatorio">*</span>
-                        @else
-                            <span class="ml-2 text-xs font-normal text-ink-soft">Opcional</span>
-                        @endif
-                    </legend>
+                <div role="group" aria-labelledby="label-{{ $question['id'] }}" class="scroll-mt-28 rounded-2xl border border-brand-canopy/10 bg-white p-5 shadow-brand sm:p-6" wire:key="question-{{ $question['id'] }}">
+                    <h2 id="label-{{ $question['id'] }}" class="flex gap-2 text-base font-semibold leading-6 text-ink-deep">
+                        <span class="shrink-0 text-brand-river">{{ $question['position'] }}.</span>
+                        <span>
+                            {{ $question['label'] }}
+                            @if ($question['is_required'])
+                                <span class="ml-1 text-brand-clay" aria-label="obligatorio">*</span>
+                            @else
+                                <span class="ml-2 whitespace-nowrap text-xs font-normal text-ink-soft">Opcional</span>
+                            @endif
+                        </span>
+                    </h2>
 
                     @if ($question['help_text'])
-                        <p id="help-{{ $question['id'] }}" class="mt-2 text-sm text-ink-soft">{{ $question['help_text'] }}</p>
+                        <p id="help-{{ $question['id'] }}" class="mt-1 text-sm text-ink-soft">{{ $question['help_text'] }}</p>
                     @endif
 
                     @if (in_array($question['type'], ['single_choice', 'scale_1_5', 'nps'], true))
-                        <div class="mt-4 grid gap-2 {{ $question['type'] === 'nps' ? 'grid-cols-4 sm:grid-cols-11' : ($question['type'] === 'scale_1_5' ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-1 sm:grid-cols-2') }}">
+                        <div class="mt-4 grid gap-2 {{ $question['type'] === 'nps' ? 'grid-cols-4 sm:grid-cols-6 md:grid-cols-11' : ($question['type'] === 'scale_1_5' ? 'grid-cols-1 sm:grid-cols-5' : 'grid-cols-1 sm:grid-cols-2') }}">
                             @foreach ($question['options'] as $option)
                                 <label for="answer-{{ $question['id'] }}-{{ $loop->index }}" class="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-brand-canopy/20 px-3 py-2 text-sm text-ink-deep transition hover:border-brand-river hover:bg-brand-mist focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand-gold">
                                     <input id="answer-{{ $question['id'] }}-{{ $loop->index }}" type="radio" wire:model.live="answers.{{ $question['id'] }}" value="{{ $option['value'] }}" class="border-brand-canopy/40 text-brand-canopy focus:ring-brand-gold">
@@ -388,7 +394,7 @@ new #[Layout('components.layouts.public')] #[Title('Encuesta ciudadana · SIIM')
                     @error($answerKey . '.*')
                         <p class="mt-3 text-sm font-semibold text-brand-clay" role="alert">{{ $message }}</p>
                     @enderror
-                </fieldset>
+                </div>
             @endforeach
 
             <aside class="rounded-xl border border-brand-river/20 bg-brand-river/5 p-4 text-sm leading-6 text-ink-soft" aria-label="Aviso de privacidad">

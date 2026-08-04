@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Testing\TestResponse;
 use Livewire\Volt\Volt;
 use SIIM\Application\Citizen\Contracts\CitizenSubmissionRepository;
 use SIIM\Application\Citizen\Data\SurveySubmission;
@@ -25,7 +24,11 @@ use SIIM\Infrastructure\Security\SurveySubmissionRateLimitKey;
 use Tests\TestCase;
 
 beforeEach(function (): void {
-    config(['citizen.public_survey_slug' => 'percepcion-2026']);
+    config([
+        'citizen.public_survey_slug' => 'percepcion-2026',
+        'citizen.submission.min_completion_seconds' => 5,
+        'citizen.submission.max_attempts' => 5,
+    ]);
     app(SurveySeeder::class)->run();
     $appKey = config('app.key');
     assert(is_string($appKey));
@@ -79,7 +82,7 @@ it('serves the public survey and thanks routes anonymously with GET throttling',
     foreach (['survey.show', 'survey.thanks'] as $routeName) {
         $route = Route::getRoutes()->getByName($routeName);
         expect($route)->not->toBeNull()
-            ->and($route?->gatherMiddleware())->toContain('throttle:20,1');
+            ->and($route?->gatherMiddleware())->toContain('throttle:' . config('citizen.submission.route_throttle'));
     }
 });
 
@@ -207,7 +210,7 @@ it('shows a soft duplicate message and removes its attempt from the denominator'
         ->and(SurveyAttempt::query()->count())->toBe(1);
 });
 
-it('returns a real Spanish HTTP 429 on the sixth submit action', function (): void {
+it('shows the rate limit message inside the form instead of breaking the page', function (): void {
     /** @var TestCase $this */
     $component = Volt::test('public.survey.show');
     $this->travel(5)->seconds();
@@ -216,13 +219,40 @@ it('returns a real Spanish HTTP 429 on the sixth submit action', function (): vo
         $component->call('submit')->assertHasErrors();
     }
 
-    $component->call('submit')->assertStatus(429);
-    $response = (fn (): mixed => $this->lastState->getResponse())->call($component);
-    assert($response instanceof TestResponse);
-    expect($response->getContent())->toBe('Has realizado demasiados intentos. Espera un minuto e inténtalo nuevamente.')
-        ->and($response->headers->get('Retry-After'))->toBe('60');
+    $component
+        ->call('submit')
+        ->assertNoRedirect()
+        ->assertSee('Has realizado demasiados intentos. Espera un minuto e inténtalo nuevamente.');
 
-    expect(SurveyAttempt::query()->count())->toBe(0);
+    expect(SurveyAttempt::query()->count())->toBe(1);
+});
+
+it('keeps the public survey usable under the relaxed production defaults', function (): void {
+    /** @var TestCase $this */
+    config([
+        'citizen.submission.min_completion_seconds' => 2,
+        'citizen.submission.max_attempts' => 60,
+    ]);
+
+    $component = Volt::test('public.survey.show');
+    $this->travel(2)->seconds();
+
+    $component
+        ->set('answers', publicSurveyAnswers())
+        ->call('submit')
+        ->assertHasNoErrors()
+        ->assertRedirect(route('survey.thanks'));
+
+    expect(SurveyResponse::query()->count())->toBe(1);
+});
+
+it('renders a styled Spanish page for HTTP 429 instead of raw text', function (): void {
+    /** @var TestCase $this */
+    $rendered = view('errors.429')->render();
+
+    expect($rendered)->toContain('Demasiadas solicitudes')
+        ->and($rendered)->toContain('Volver a la encuesta')
+        ->and($rendered)->toContain('bg-brand-mist');
 });
 
 it('links the public survey from the landing page', function (): void {
