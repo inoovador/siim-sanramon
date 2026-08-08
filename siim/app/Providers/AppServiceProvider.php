@@ -80,7 +80,7 @@ class AppServiceProvider extends ServiceProvider
             return new NvidiaGlmAssistant(
                 apiKey: (string) ($cfg['api_key'] ?? ''),
                 baseUrl: (string) ($cfg['base_url'] ?? 'https://integrate.api.nvidia.com/v1'),
-                model: (string) ($cfg['model'] ?? 'z-ai/glm-5.1'),
+                model: (string) ($cfg['model'] ?? 'z-ai/glm-5.2'),
                 timeout: (int) ($cfg['timeout'] ?? 30),
                 maxTokens: (int) ($cfg['max_tokens'] ?? 4096),
                 verifySsl: (bool) ($cfg['verify_ssl'] ?? true),
